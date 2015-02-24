@@ -1,0 +1,76 @@
+Go to valid mediation directory to extract image data.
+??? Output argument "wh_is_image" (and maybe others) not assigned during call to "/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_print_tables.m (load_mediation_setup)".
+
+Error in ==> <a href="error:/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_print_tables.m,52,1">mediation_brain_print_tables>load_mediation_setup at 52</a>
+    SETUP = [];
+
+Error in ==> <a href="error:/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_print_tables.m,3,1">mediation_brain_print_tables at 3</a>
+[SETUP, imgs, wh_is_image, name] = load_mediation_setup;
+
+ls
+M-Y_effect.hdr				X-M-Y_pvals.hdr				XMY_conjunction.hdr
+M-Y_effect.img				X-M-Y_pvals.img				XMY_conjunction.img
+M-Y_pvals.hdr				X-M_effect.hdr				med_results.mat
+M-Y_pvals.img				X-M_effect.img				mediation_network_level_output.txt
+X-M-Y_effect.hdr			X-M_pvals.hdr				results_005_01_05_3_10_10
+X-M-Y_effect.img			X-M_pvals.img
+
+%% make table
+
+diary('mediation_network_level_output.txt');
+[clpos_data, clneg_data] = mediation_brain_print_tables(clpos_data, clneg_data);
+diary off
+
+Go to valid mediation directory to extract image data.
+??? Output argument "wh_is_image" (and maybe others) not assigned during call to "/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_print_tables.m (load_mediation_setup)".
+
+Error in ==> <a href="error:/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_print_tables.m,52,1">mediation_brain_print_tables>load_mediation_setup at 52</a>
+    SETUP = [];
+
+Error in ==> <a href="error:/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_print_tables.m,3,1">mediation_brain_print_tables at 3</a>
+[SETUP, imgs, wh_is_image, name] = load_mediation_setup;
+
+%% make table
+
+diary('mediation_network_level_output.txt');
+[clpos_data, clneg_data] = mediation_brain_print_tables(clpos_data, clneg_data);
+diary off
+
+Getting local maxima within 10 mm for subcluster reporting
+ 
+Cluster of   3 voxels from /Users/tor/Documents/Tor_Documents/CurrentExperiments/Lab_Emotion/Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Msearch_R_XisRIFGstim_norobust/XMY_conjunction.img_1_49_voxels
+ 
+Name	index	x	y	z	corr	voxels	volume_mm3	maxstat	numpeaks	snr_avgts(d)	minsnr	maxsnr	numpos	power80	partialr_with_y	partialr_p	
+PHCP (R)	  1	 52	-38	-22	NaN	 49	2606	5.60	  4	0.15	-0.14	0.36	 14	757	0.55	0.0018	
+->	 58	-45	-27	NaN	 17	5.33591		0.15	-0.14	0.36	 14	757	
+->	 52	-38	-22	NaN	 24	5.59680		0.15	-0.14	0.36	 14	757	
+->	 34	-31	-18	NaN	  8	5.56940		0.15	-0.14	0.36	 14	757	
+IPL (R)	  2	 34	-69	 32	NaN	 57	3031	6.10	  2	0.10	-0.23	0.29	 19	1560	0.50	0.0054	
+->	 28	-62	 27	NaN	 17	4.81665		0.10	-0.23	0.29	 19	1560	
+->	 38	-72	 36	NaN	 40	6.09669		0.10	-0.23	0.29	 19	1560	
+DMPFC	  3	 -3	 17	 58	NaN	474	25204	8.47	 29	0.51	-0.10	1.21	 22	 64	0.61	0.0004	
+->	 28	 31	 32	NaN	 21	4.91356		0.51	-0.10	1.21	 22	 64	
+->	-24	 21	 40	NaN	  6	3.98507		0.51	-0.10	1.21	 22	 64	
+->	 38	 31	 36	NaN	  3	3.75011		0.51	-0.10	1.21	 22	 64	
+->	 28	 41	 36	NaN	 32	4.71651		0.51	-0.10	1.21	 22	 64	
+->	 24	 28	 40	NaN	 14	4.30866		0.51	-0.10	1.21	 22	 64	
+->	-10	 17	 45	NaN	 20	6.51549		0.51	-0.10	1.21	 22	 64	
+->	 14	 45	 45	NaN	 14	5.97597		0.51	-0.10	1.21	 22	 64	
+->	-21	 28	 50	NaN	 21	5.11742		0.51	-0.10	1.21	 22	 64	
+->	 14	 38	 50	NaN	  8	5.11144		0.51	-0.10	1.21	 22	 64	
+->	-10	 45	 50	NaN	 12	4.35783		0.51	-0.10	1.21	 22	 64	
+->	-24	-17	 54	NaN	  3	3.73290		0.51	-0.10	1.21	 22	 64	
+->	-34	 -7	 58	NaN	 11	4.19822		0.51	-0.10	1.21	 22	 64	
+->	  0	 -3	 58	NaN	 12	4.04702		0.51	-0.10	1.21	 22	 64	
+->	-24	 14	 54	NaN	 30	5.02851		0.51	-0.10	1.21	 22	 64	
+->	 28	 21	 54	NaN	 55	5.88256		0.51	-0.10	1.21	 22	 64	
+->	 -7	 21	 63	NaN	 27	4.18889		0.51	-0.10	1.21	 22	 64	
+->	 -3	 -7	 63	NaN	 26	4.53195		0.51	-0.10	1.21	 22	 64	
+->	-28	  3	 63	NaN	 31	5.64572		0.51	-0.10	1.21	 22	 64	
+->	-10	  3	 68	NaN	 52	8.47465		0.51	-0.10	1.21	 22	 64	
+->	 10	 28	 63	NaN	 29	5.50923		0.51	-0.10	1.21	 22	 64	
+->	 10	 14	 68	NaN	 32	4.82457		0.51	-0.10	1.21	 22	 64	
+->	  0	 -3	 72	NaN	 15	4.94997		0.51	-0.10	1.21	 22	 64	
+PreCun	  4	 -3	-52	 68	NaN	 49	2606	5.96	  3	0.18	-0.07	0.30	 21	473	0.52	0.0036	
+->	  0	-55	 68	NaN	 38	5.96343		0.18	-0.07	0.30	 21	473	
+->	-10	-41	 72	NaN	 11	3.88406		0.18	-0.07	0.30	 21	473	

@@ -1,0 +1,72 @@
+Summary of output images:
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/X-M_pvals.img      
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/M-Y_pvals.img      
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/X-M-Y_pvals.img    
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/XMY_conjunction.img
+Results clusters clpos and clneg are returned for the LAST image in this set.
+ 
+Printing Tables.
+NOTE: FULL MEDIATION TABLES DO NOT WORK YET FOR SINGLE-LEVEL RESULTS
+Printing abbreviated tables.
+Positive effects
+ 
+Z field contains: Mediation conjunction (max p-value for a, b, ab) (shown in maxstat)
+ 
+Name	index	x	y	z	corr	voxels	volume_mm3	maxstat	
+R1	  1	 -3	 17	 58	NaN	448	23822	8.47	
+Negative effects
+No results to print.
+Summary of output images:
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/X-M_pvals.img      
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/M-Y_pvals.img      
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/X-M-Y_pvals.img    
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/XMY_conjunction.img
+Results clusters clpos and clneg are returned for the LAST image in this set.
+ 
+Printing Tables.
+NOTE: FULL MEDIATION TABLES DO NOT WORK YET FOR SINGLE-LEVEL RESULTS
+Printing abbreviated tables.
+Positive effects
+ 
+Z field contains: Mediation conjunction (max p-value for a, b, ab) (shown in maxstat)
+ 
+Name	index	x	y	z	corr	voxels	volume_mm3	maxstat	
+R1	  1	 -3	 17	 58	NaN	448	23822	8.47	
+Negative effects
+No results to print.
+Summary of output images:
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/X-M_pvals.img      
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/M-Y_pvals.img      
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/X-M-Y_pvals.img    
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/XMY_conjunction.img
+Results clusters clpos and clneg are returned for the LAST image in this set.
+ 
+Printing Tables.
+NOTE: FULL MEDIATION TABLES DO NOT WORK YET FOR SINGLE-LEVEL RESULTS
+Printing abbreviated tables.
+Positive effects
+ 
+Z field contains: Mediation conjunction (max p-value for a, b, ab) (shown in maxstat)
+ 
+Name	index	x	y	z	corr	voxels	volume_mm3	maxstat	
+R1	  1	 -3	 17	 58	NaN	448	23822	8.47	
+Negative effects
+No results to print.
+Summary of output images:
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/X-M_pvals.img      
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/M-Y_pvals.img      
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/X-M-Y_pvals.img    
+/Users/tor/Documents/Tor_Documents/PublishedProjects/2008_Wager_Pre-appraisal/results_model1_SPM/mediation_dirs/mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust/XMY_conjunction.img
+Results clusters clpos and clneg are returned for the LAST image in this set.
+ 
+Printing Tables.
+NOTE: FULL MEDIATION TABLES DO NOT WORK YET FOR SINGLE-LEVEL RESULTS
+Printing abbreviated tables.
+Positive effects
+ 
+Z field contains: Mediation conjunction (max p-value for a, b, ab) (shown in maxstat)
+ 
+Name	index	x	y	z	corr	voxels	volume_mm3	maxstat	snr_avgts(d)	minsnr	maxsnr	numpos	power80	
+R1	  1	 -3	 17	 58	NaN	448	23822	8.47	0.53	-0.10	1.21	 23	 59	
+Negative effects
+No results to print.
