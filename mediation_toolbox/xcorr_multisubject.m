@@ -208,6 +208,10 @@ fprintf('\n');
 fprintf('stats...')
 [mxc,t,sig,OUT.stats] = ttest3d(OUT.pairwise_assoc{1});
 
+t = OUT.stats.t .* abs(OUT.stats.fdrsig);
+t = (t + t') ./ 2;
+OUT.stats.fdr_thresholded_tvalues = t;
+
 fprintf('\n');
 
 end % Main function
