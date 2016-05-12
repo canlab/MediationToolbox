@@ -122,7 +122,7 @@ function cleanup_axis()
 end
 
 function pts = plot_region_circ(name, loc)
-    pts = circleAsPolygon([loc(1) loc(2) .5], 200);
+    pts = circleToPolygon([loc(1) loc(2) .5], 200);
     fillPolygon(pts, [.8 .8 .8])
     h = drawPolygon(pts, 'k');
     set(h, 'LineWidth', 2, 'Color', [.7 .7 .7]);
