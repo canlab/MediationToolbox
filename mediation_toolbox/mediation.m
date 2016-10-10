@@ -364,7 +364,7 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
                 %confidence intervals.  Added by Yoni 4/22.  I'm not 100%
                 %confident of accuracy, but I think its right.
                 if doCIs
-                    [cis] = bootbca_ci(.025, mediationfun, bootpaths, mediationfun(x, y, m, intcpt),  x, y, m, intcpt)
+                    [cis] = bootbca_ci(.025, mediationfun, bootpaths, mediationfun(x, y, m, intcpt),  x, y, m, intcpt);
                     %[dummy, dummy, stats.z, stats.p] = bootbca_pval_onetail(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt), x, y, m, intcpt);
 
                     disp('95% CIs are:');
@@ -1387,7 +1387,9 @@ function paths = fast_ols_ab(x, y, m, intcpt, varargin)
 
     % notes on speed:
     % X \ y is 10 x faster than pinv(X)*y, and inv(X'X)X'y is 3 x faster than
-    % pinv
+    % pinv 
+    % Matlab2014b - inv is faster than X\y. The latter should be more
+    % precise. SG
 
     px = inv(xx'*xx)*xx'; % X beta-forming matrix
     mx = [m xx];
@@ -1506,7 +1508,7 @@ function plot_hists(bootpaths, vnames)
     subplot(1, 5, 2);
     shaded_hist(b);
     title(['b: ' vnames{3} '->' vnames{2}]);
-    xlimit = [min(min(b), 0 - .2*nanmean(b)) max(b)];
+    xlimit = [min(nanmin(b), 0 - .2*nanmean(b)) nanmax(b)];
     set(gca, 'XLim', xlimit);
 
     subplot(1, 5, 3);
