@@ -1,0 +1,45 @@
+Summary of output images:
+X-M-Y_pvals.img
+Results clusters clpos and clneg are returned for the LAST image in this set.
+ 
+Printing Tables.
+NOTE: FULL MEDIATION TABLES DO NOT WORK YET FOR SINGLE-LEVEL RESULTS
+Printing abbreviated tables.
+Positive effects
+ 
+Z field contains: Mediation ab effect (shown in maxstat)
+ 
+Name	index	x	y	z	corr	voxels	volume_mm3	maxstat	
+R1	  1	 -7	  0	 50	NaN	1146	60937	11.07	
+Negative effects
+No results to print.
+Summary of output images:
+X-M-Y_pvals.img
+Results clusters clpos and clneg are returned for the LAST image in this set.
+ 
+Printing Tables.
+NOTE: FULL MEDIATION TABLES DO NOT WORK YET FOR SINGLE-LEVEL RESULTS
+Printing abbreviated tables.
+Positive effects
+ 
+Z field contains: Mediation ab effect (shown in maxstat)
+ 
+Name	index	x	y	z	corr	voxels	volume_mm3	maxstat	
+R1	  1	 -7	  0	 50	NaN	1146	60937	11.07	
+Negative effects
+No results to print.
+Summary of output images:
+X-M-Y_pvals.img
+Results clusters clpos and clneg are returned for the LAST image in this set.
+ 
+Printing Tables.
+NOTE: FULL MEDIATION TABLES DO NOT WORK YET FOR SINGLE-LEVEL RESULTS
+Printing abbreviated tables.
+Positive effects
+ 
+Z field contains: Mediation ab effect (shown in maxstat)
+ 
+Name	index	x	y	z	corr	voxels	volume_mm3	maxstat	snr_avgts(d)	minsnr	maxsnr	numpos	power80	
+R1	  1	 -7	  0	 50	NaN	1146	60937	11.07	0.36	-0.32	1.21	 22	125	
+Negative effects
+No results to print.

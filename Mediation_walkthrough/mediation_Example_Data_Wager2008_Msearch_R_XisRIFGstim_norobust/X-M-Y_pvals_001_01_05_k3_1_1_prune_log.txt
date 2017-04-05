@@ -1,0 +1,112 @@
+Warning: Unknown input string option:noadd
+> In <a href="error:/Users/tor/Documents/matlab_code/SCN_Core_Support/Index_image_manip_tools/iimg_multi_threshold.m,117,1">iimg_multi_threshold at 117</a>
+  In <a href="error:/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_results.m,592,1">mediation_brain_results>doorthviews at 592</a>
+  In <a href="error:/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_results.m,240,1">mediation_brain_results at 240</a>
+  In <a href="error:/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_results_all_script.m,147,1">mediation_brain_results_all_script at 147</a>
+
+iimg_multi_threshold viewer
+=====================================================
+Showing positive or negative: pos
+Overlay is: /Users/tor/Documents/matlab_code/3DheadUtility_lite/scnlab_canonical_brains/spm2_single_subj_T1_scalped.img
+Mask is: mask.img
+Entered p-value image? : Yes
+Height thresholds:0.0010 0.0100 0.0500 
+Extent thresholds:   3   1   1 
+Show only contiguous with seed regions: Yes
+ 
+Warning: p-values in cl.Z will not give valid spm_max subclusters.
+log(1/p) saved in output cl.Z field.
+
+iimg_multi_threshold viewer
+=====================================================
+Showing positive or negative: neg
+Overlay is: /Users/tor/Documents/matlab_code/3DheadUtility_lite/scnlab_canonical_brains/spm2_single_subj_T1_scalped.img
+Mask is: mask.img
+Entered p-value image? : Yes
+Height thresholds:0.0010 0.0100 0.0500 
+Extent thresholds:   3   1   1 
+Show only contiguous with seed regions: Yes
+ 
+Warning: p-values in cl.Z will not give valid spm_max subclusters.
+log(1/p) saved in output cl.Z field.
+Extracting image data for significant clusters. Images are not valid files.
+Extracting image data for significant clusters. No clusters to extract.
+Saving clusters in cl_X-M-Y_pvals_001_01_05_k3_1_1_prune
+Saving image of slices: orth_X-M-Y_pvals_001_01_05_k3_1_1_prune_coronal.png
+Saving image of slices: orth_X-M-Y_pvals_001_01_05_k3_1_1_prune_sagittal.png
+Saving image of slices: orth_X-M-Y_pvals_001_01_05_k3_1_1_prune_axial.png
+Warning: Unknown input string option:noadd
+> In <a href="error:/Users/tor/Documents/matlab_code/SCN_Core_Support/Index_image_manip_tools/iimg_multi_threshold.m,117,1">iimg_multi_threshold at 117</a>
+  In <a href="error:/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_results.m,592,1">mediation_brain_results>doorthviews at 592</a>
+  In <a href="error:/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_results.m,240,1">mediation_brain_results at 240</a>
+  In <a href="error:/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_results_all_script.m,147,1">mediation_brain_results_all_script at 147</a>
+
+iimg_multi_threshold viewer
+=====================================================
+Showing positive or negative: pos
+Overlay is: /Users/tor/Documents/matlab_code/3DheadUtility_lite/scnlab_canonical_brains/spm2_single_subj_T1_scalped.img
+Mask is: mask.img
+Entered p-value image? : Yes
+Height thresholds:0.0010 0.0100 0.0500 
+Extent thresholds:   3   1   1 
+Show only contiguous with seed regions: Yes
+ 
+Warning: p-values in cl.Z will not give valid spm_max subclusters.
+log(1/p) saved in output cl.Z field.
+
+iimg_multi_threshold viewer
+=====================================================
+Showing positive or negative: neg
+Overlay is: /Users/tor/Documents/matlab_code/3DheadUtility_lite/scnlab_canonical_brains/spm2_single_subj_T1_scalped.img
+Mask is: mask.img
+Entered p-value image? : Yes
+Height thresholds:0.0010 0.0100 0.0500 
+Extent thresholds:   3   1   1 
+Show only contiguous with seed regions: Yes
+ 
+Warning: p-values in cl.Z will not give valid spm_max subclusters.
+log(1/p) saved in output cl.Z field.
+Extracting image data for significant clusters. Images are not valid files.
+Extracting image data for significant clusters. No clusters to extract.
+Appending clusters in cl_X-M-Y_pvals_001_01_05_k3_1_1_prune
+Saving image of slices: orth_X-M-Y_pvals_001_01_05_k3_1_1_prune_coronal.png
+Saving image of slices: orth_X-M-Y_pvals_001_01_05_k3_1_1_prune_sagittal.png
+Saving image of slices: orth_X-M-Y_pvals_001_01_05_k3_1_1_prune_axial.png
+Warning: Unknown input string option:noadd
+> In <a href="error:/Users/tor/Documents/matlab_code/SCN_Core_Support/Index_image_manip_tools/iimg_multi_threshold.m,117,1">iimg_multi_threshold at 117</a>
+  In <a href="error:/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_results.m,592,1">mediation_brain_results>doorthviews at 592</a>
+  In <a href="error:/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_results.m,240,1">mediation_brain_results at 240</a>
+  In <a href="error:/Users/tor/Documents/matlab_code/mediation_toolbox/mediation_brain_results_all_script.m,147,1">mediation_brain_results_all_script at 147</a>
+
+iimg_multi_threshold viewer
+=====================================================
+Showing positive or negative: pos
+Overlay is: /Users/tor/Documents/matlab_code/3DheadUtility_lite/scnlab_canonical_brains/spm2_single_subj_T1_scalped.img
+Mask is: mask.img
+Entered p-value image? : Yes
+Height thresholds:0.0010 0.0100 0.0500 
+Extent thresholds:   3   1   1 
+Show only contiguous with seed regions: Yes
+ 
+Warning: p-values in cl.Z will not give valid spm_max subclusters.
+log(1/p) saved in output cl.Z field.
+
+iimg_multi_threshold viewer
+=====================================================
+Showing positive or negative: neg
+Overlay is: /Users/tor/Documents/matlab_code/3DheadUtility_lite/scnlab_canonical_brains/spm2_single_subj_T1_scalped.img
+Mask is: mask.img
+Entered p-value image? : Yes
+Height thresholds:0.0010 0.0100 0.0500 
+Extent thresholds:   3   1   1 
+Show only contiguous with seed regions: Yes
+ 
+Warning: p-values in cl.Z will not give valid spm_max subclusters.
+log(1/p) saved in output cl.Z field.
+Extracting image data for significant clusters. Using cached image names.
+
+Extracting image data for significant clusters. No clusters to extract.
+Appending clusters in cl_X-M-Y_pvals_001_01_05_k3_1_1_prune
+Saving image of slices: orth_X-M-Y_pvals_001_01_05_k3_1_1_prune_coronal.png
+Saving image of slices: orth_X-M-Y_pvals_001_01_05_k3_1_1_prune_sagittal.png
+Saving image of slices: orth_X-M-Y_pvals_001_01_05_k3_1_1_prune_axial.png
