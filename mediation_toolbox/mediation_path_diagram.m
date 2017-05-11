@@ -153,7 +153,10 @@ function plot_stats_string(loc_text, stats, stats_idx, varargin)
     elseif stats.p(1, stats_idx) < .01, sigstr = '**';
     elseif stats.p(1, stats_idx) < .05, sigstr = '*';
     else sigstr = ''; end
-    
-    str = sprintf('%3.2f (%3.2f) %s', stats.mean(stats_idx), stats.ste(stats_idx), sigstr);
+    if stats.mean(stats_idx) < 0.01
+        str = sprintf('%5.4f (%5.4f) %s', stats.mean(stats_idx), stats.ste(stats_idx), sigstr);
+    else
+        str = sprintf('%3.2f (%3.2f) %s', stats.mean(stats_idx), stats.ste(stats_idx), sigstr);
+    end
     text(loc_text(1), loc_text(2), str, 'FontSize', 12, varargin{:});
 end
