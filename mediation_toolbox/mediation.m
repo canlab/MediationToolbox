@@ -576,7 +576,8 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         end
         
         % Plot individual effects
-        create_figure('Individual Effects'); barplot_columns(paths, 'Individual Effects', [], 'nofig', 'plotout','number');
+        create_figure('Individual Effects');
+        barplot_columns(paths, 'Individual Effects', [], 'nofig', 'plotout','names',stats.names);
         set(gca, 'XTickLabel', stats.names);
         ylabel('Beta (slope) values');
         
