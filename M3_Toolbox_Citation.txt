@@ -1,0 +1,9 @@
+Citations for M3 Mediation Toolbox
+
+The key papers describing the toolbox are below.  It would be great to cite these papers when using the M3 toolbox.  The manuscripts and supplementary information contain fairly complete descriptions of the model and statistical procedures used.
+
+Wager, T. D., Davidson, M. L., Hughes, B. L., Lindquist, M. A., & Ochsner, K. N. (2008). Prefrontal-subcortical pathways mediating successful emotion regulation. Neuron, 59(6), 1037-1050. doi:10.1016/j.neuron.2008.09.006
+
+Wager, T. D., Waugh, C. E., Lindquist, M., Noll, D. C., Fredrickson, B. L., & Taylor, S. F. (2009). Brain mediators of cardiovascular responses to social threat, Part I: Reciprocal dorsal and ventral sub-regions of the medial prefrontal cortex and heart-rate reactivity. NeuroImage, 47, 821-835.
+
+This toolbox was developed under a grant from the U.S. National Science Foundation (NSF).  Please cite Grant NSF 0631637. “Multilevel mediation techniques for fMRI.”
