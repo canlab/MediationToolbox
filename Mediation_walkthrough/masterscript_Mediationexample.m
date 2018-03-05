@@ -9,18 +9,18 @@ clear all
 
 %Step 1 of walkthrough
 
-%cd('/Users/Erik/Desktop/Fall 2015/Principals of fMRI/fMRI_matlab/Mediation_example_data')
+%cd('/Path/to/MediationToolbox/Mediation_walkthrough/')
 %Just drag the folder into the command window to get to the proper directory
 
 %Step 2
-imgs = filenames('Images_for_mediation/con_*img', 'char', 'absolute');
+dinf = what('Wager_et_al_2008_Neuron_EmotionReg');
+imgs = filenames(fullfile(dinf.path,'con_*img'), 'char', 'absolute');
 
 %Step 3
-behav_dat=importdata('X_Y_data.txt')
+behav_dat=importdata(fullfile(dinf.path,'X_Y_data.txt'))
 
 %Step 4
-mask=filenames('Images_for_mediation/gray_matter_mask.img','char','absolute')
-mask(100:end)
+mask=which('gray_matter_mask.img')
 canlab_results_fmridisplay(mask, 'compact2');
 
 %Step 5
@@ -40,8 +40,14 @@ results=mediation_brain(x,y,imgs,'names',names,'mask','resliced_mask.img','boot'
 
 %Step 8
     %Make yourself a cup of tea while the results are compiled as this is going to take a while
+    % pre-compiled results are also available in
+    % 'mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust'
 
 %Step 9
+% change to the mediation analysis directory, if you haven't done, yet.
+% compute result images and figures
+mediation_brain_results_all_script;
 
-%Not sure what functions to run here? 
+
+% see mediation_brain_results for more options.
 
