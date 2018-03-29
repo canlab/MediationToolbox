@@ -4,10 +4,17 @@ Getting started: See WIKI at wagerlab.colorado.edu
 There is also a help document PDF in MediationToolbox folder
 
 : mediationanalysis.com, mediationanalysis.org
+
 =======
 For single- and multi-level mediation search tools.
 
 Docmentation available [here](http://canlabweb.colorado.edu/wiki/doku.php/help/fmri_tools_documentation).
+
+A walkthrough-example is available [here](https://github.com/canlab/MediationToolbox/tree/master/Mediation_walkthrough)
+
+For the high-dimensional mediation analysis, see [here](https://github.com/canlab/MediationToolbox/tree/master/PDM_toolbox)
+
+=======
 
 Citing:
 The key papers describing the toolbox are below.  It would be helpful to cite these papers when using the M3 toolbox.  The manuscripts and supplementary information contain fairly complete descriptions of the model and statistical procedures used.
@@ -15,6 +22,8 @@ The key papers describing the toolbox are below.  It would be helpful to cite th
 Wager, T. D., Davidson, M. L., Hughes, B. L., Lindquist, M. A., & Ochsner, K. N. (2008). Prefrontal-subcortical pathways mediating successful emotion regulation. Neuron, 59(6), 1037-1050. doi:10.1016/j.neuron.2008.09.006
 
 Wager, T. D., Waugh, C. E., Lindquist, M., Noll, D. C., Fredrickson, B. L., & Taylor, S. F. (2009). Brain mediators of cardiovascular responses to social threat, Part I: Reciprocal dorsal and ventral sub-regions of the medial prefrontal cortex and heart-rate reactivity. NeuroImage, 47, 821-835. 
+
+=======
 
 Here is a sample of papers using the M3 mediation toolbox. If you know of others we should include, please let us know!
 

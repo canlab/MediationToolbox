@@ -71,7 +71,7 @@ function med_results = mediation_brain(X, Y, M, varargin)
     % * Defaults
     % --------------------------------------
 
-    spm_defaults
+    spm_get_defaults('modality','fmri');
     
     robust_opt = 'norobust';
     boot_opt = 'boot1';

@@ -8,7 +8,6 @@ clear all
 %con_00810028.img.txt to just con_00810028.img
 
 %Step 1 of walkthrough
-
 %cd('/Path/to/MediationToolbox/Mediation_walkthrough/')
 %Just drag the folder into the command window to get to the proper directory
 
