@@ -99,7 +99,7 @@ clear Q;
 
 % Randomly sample voxels from this cohort and compute threshold
 [~,ind2] = sort(normrnd(0,1,2*num1,1));
-nsamp = 1000;  % "Sample size" for estimating null
+nsamp = min(length(ind2),2000);  % "Sample size" for estimating null
 
 v0 = sort(reshape(QQ(ind2(1:nsamp),:),nsamp*Bsamp,1));
 clear QQ ind ind2;
