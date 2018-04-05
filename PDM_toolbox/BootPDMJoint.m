@@ -58,10 +58,11 @@ start = [0; stop(1:(end-1))] + 1;
 
 pinvDt = pinv(Dt);
 clear Dt;
+fprintf('              ');
 
 for i=1:Bsamp,
     
-    fprintf('%d\n',i);
+    fprintf([repmat('\b',1,14) '%5d / %5d\n'],i,Bsamp);
     
     % Bootstrap samples of the data
     subind = ceil(unifrnd(0,nsub,nsub,1));
@@ -97,6 +98,8 @@ for i=1:Bsamp,
     Wboot(:,i) = abs(pinvDt*(w_n*(a_n.*b_n)'));
     Tboot(:,i,:) = theta_n;
 end
+
+fprintf('\n');
 
 % Compute pseudo-null
 

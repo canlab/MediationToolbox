@@ -60,7 +60,7 @@ if isnumeric(whPDM)
     % loop PDMs to bootstrap
     for k = whPDM
         
-        fprintf('\nBootstrapping PDM %d with %d samples\n\n',k,Bsamp);
+        fprintf('\nBootstrapping PDM %d with %d samples\n',k,Bsamp);
         
         if k == 1
             % first PDM
