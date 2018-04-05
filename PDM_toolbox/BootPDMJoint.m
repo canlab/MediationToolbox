@@ -129,8 +129,6 @@ else
 end
 
 
-pv(pv==0) = eps;
-
 end
 
 % phat0 = gamfit(v0);

@@ -73,6 +73,12 @@ function out = multivariateMediation(varargin)
 %     **Bsamp**
 %         followed by the number of bootstrap samples for each PDM [default=5000]
 %         
+%     **notable**
+%         don't print a table with the path coefficients
+%
+%     **plots**
+%         plot coefficients
+%
 %     **save2file**
 %         followed by a .mat-filename to which the results in the output  
 %         structure will be saved.
@@ -107,6 +113,8 @@ function out = multivariateMediation(varargin)
 % 02/23/2018 - Stephan Geuter
 % created the file
 %
+% 4/3/2018 - Stephan Geuter
+% added table and figure options
 %
 
 %% determine input mode
@@ -158,6 +166,10 @@ doBootPDM   = 0;                  % bootstrap individual PDMs
 doBootJPDM  = 0;                  % bootstrap joint PDM
 bootAllPDM  = 1;                  % bootstrap all PDMs 
 Bsamp       = 5000;               % number of bootstrap samples
+alpha       = 0.05;               % significance threshold for bootstrapped voxels
+sigMethod   = 'fdr';              % multiple comparison correction method
+printtable  = 1;                  % print a table with path coefficients
+doplots     = 0;                  % plot coefficients
 save2file   = 0;                  % save results to file
 returnBootsamples = 0;            % return Bootstrap samples (large array)
 
@@ -170,20 +182,23 @@ for j=optInStart:numel(varargin)
     
     if ischar(varargin{j})
         switch lower(varargin{j}) % all keyword comparisons in lower case
-                            
-            case {'nopdmestimation'}, doPDM=0;
                 
+            % dimension reduction
             case {'b'}
                 if dimReduction==1
                     out.dat.B  = varargin{j+1}; varargin{j+1} = [];
                 else
                     warning('No dimension reduction requested, ignoring ''B'' input');
                 end
+                     
+            % PDM estimation    
+            case {'nopdmestimation'}, doPDM=0;
                 
             case {'npdm'}, nPDM = varargin{j+1}; varargin{j+1} = [];
                 
             case {'jpdm','jointpdm'}, doJointPDM = varargin{j+1}; varargin{j+1} = [];
                 
+            % bootstrapping    
             case {'bootpdm'}
                 doBootPDM = 1;
                 if numel(varargin)>j && isnumeric(varargin{j+1})
@@ -195,9 +210,23 @@ for j=optInStart:numel(varargin)
                 
             case {'bsamp'}, Bsamp = varargin{j+1}; varargin{j+1} = [];
                 
+            case {'returnbootsamples'}, returnBootsamples = 1;
+    
+            case {'alpha'}, alpha = varargin{j+1}; varargin{j+1} = []; 
+                
+            case {'fdr'}, sigMethod = 'fdr';
+                
+            case {'bonf','bonferroni'}, sigMethod = 'bonf';    
+            
+            case {'unc','uncorrected'}, sigMethod = 'unc';    
+                
+            % output   
+            case {'notable','notables'}, printtable=0;     
+                
+            case {'plot','plots'}, doplots = 1;    
+                
             case {'save2file','savetofile'}, save2file = 1; outFn = varargin{j+1}; varargin{j+1} = [];
                 
-            case {'returnbootsamples'}, returnBootsamples = 1;
                 
             otherwise, warning(['Unknown input string option: ' varargin{j}]);
         end
@@ -236,6 +265,16 @@ if doPDM
     if save2file
         save(outFn,'out');
     end
+    
+    % output table
+    if printtable
+        printPathCoeff(out.Theta);
+    end
+    
+    % coeff figure
+    if doplots
+        plotPathCoeff(out.Theta);
+    end
 end
 
 
@@ -273,7 +312,6 @@ if doBootJPDM
 end
 
 
-
 %% collect outputs
 
 if doJointPDM==0
@@ -298,9 +336,16 @@ if doBootJPDM
     end
 end
 
+% threshold bootstrapped PDMs
+if doBootPDM || doBootJPDM
+    out = thresholdPDM(out,alpha,sigMethod);
+end
+
 if save2file
     save(outFn,'out','-v7.3');
 end
+
+
 
 
 
@@ -337,4 +382,42 @@ end
             error('Data dimension mismatch between Dt and M_tilde');
         end
     end
+
+
+
+    function printPathCoeff(theta)
+        theta = [theta{:}];
+        dashes = '_____________________________________________________________________';
+        fprintf('\nPDM path coefficients\n%s\n\tpath a\t\tpath b\t\tpath ab\t\tpath c''\n',dashes);
+        for k=1:size(theta,2)
+            fprintf('PDM%2d\t%5.4f\t\t%5.4f\t\t%5.4f\t\t%5.4f\n',k,theta(3,k),theta(4,k),theta(5,k),theta(2,k));
+        end
+        fprintf('%s\n',dashes);
+    end
+
+
+    function plotPathCoeff(theta)
+        theta = [theta{:}];
+        col = lines(4);
+        create_figure('PDM paths',1,4); clf;
+        subplot(1,4,1);
+        plot(theta(3,:),'-o','color',col(1,:),'linewidth',1.5); 
+        title('path a'); xlabel('PDM #'); ylabel('coefficients');
+        
+        subplot(1,4,2);
+        plot(theta(4,:),'-o','color',col(2,:),'linewidth',1.5);
+        title('path b'); xlabel('PDM #');
+        
+        subplot(1,4,3);
+        plot(abs(theta(5,:)),'-o','color',col(3,:),'linewidth',1.5);
+        title('abs(path ab)'); xlabel('PDM #');
+        
+        subplot(1,4,4);
+        plot(theta(2,:),'-o','color',col(4,:),'linewidth',1.5);
+        title('path c'''); xlabel('PDM #');
+        
+        ax=findobj(gcf,'Type','axes');
+        set(ax,'xlim',[0.5 size(theta,2)+0.5],'FontSize',12,'Xtick',1:size(theta,2));
+    end
+
 end
