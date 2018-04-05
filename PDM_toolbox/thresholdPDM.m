@@ -61,6 +61,7 @@ if ~isfield(pdm,'boot'), error('no bootstrap results found in PDM struct'); end
 p = pdm.boot.p;
 Wf= pdm.Wfull;
 WfSig = cell(size(Wf));
+pTAll = [];
 
 % threshold PDMs with bootstrap results
 for k=1:numel(p)
@@ -74,6 +75,8 @@ for k=1:numel(p)
     if isempty(pT), pT=0; end
     
     WfSig{k} = Wf{k} .* single(p{k}<pT);
+    
+    pTAll(end+1) = pT;
 end
 
 % threshold joint PDM
@@ -84,16 +87,18 @@ if isfield(pdm,'WfullJoint') && isfield(pdm.boot,'pJointPDM')
     switch lower(sigMethod)
         case {'unc','uncorrected'}, pT = alpha;
         case 'fdr', p{1}(p{1}==0) = eps; pT = FDR(p{1},alpha);
-        case {'bonf','bonferroni'}, pT = alpha/numel(p{1});
+        case {'bonf','bonferroni'}, pT= alpha/numel(p{1});
     end
     
     if isempty(pT), pT=0; end
     
     WJSig = pdm.WfullJoint .* single(p{1}<pT);
+    
+    pTAll(end+1) = pT;
 end
 
 % collect output
-pdm.pThreshold = pT;
+pdm.pThreshold = pTAll;
 pdm.pType = sigMethod;
 pdm.WfullThresh = WfSig;
 pdm.WfullJointThresh = WJSig;

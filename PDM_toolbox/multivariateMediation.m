@@ -116,6 +116,10 @@ function out = multivariateMediation(varargin)
 % 4/3/2018 - Stephan Geuter
 % added table and figure options
 %
+% 4/5/2018 - Stephan Geuter
+% added significance thresholding
+%
+
 
 %% determine input mode
 %%% standard input mode - X,Y,and M as cell arrays %%%
