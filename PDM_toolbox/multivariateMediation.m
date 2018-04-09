@@ -403,25 +403,22 @@ end
     function plotPathCoeff(theta)
         theta = [theta{:}];
         col = lines(4);
-        create_figure('PDM paths',1,4); clf;
-        subplot(1,4,1);
+        create_figure('PDM paths',1,3); clf;
+        subplot(1,3,1);
         plot(theta(3,:),'-o','color',col(1,:),'linewidth',1.5); 
         title('path a'); xlabel('PDM #'); ylabel('coefficients');
         
-        subplot(1,4,2);
+        subplot(1,3,2);
         plot(theta(4,:),'-o','color',col(2,:),'linewidth',1.5);
         title('path b'); xlabel('PDM #');
         
-        subplot(1,4,3);
+        subplot(1,3,3);
         plot(abs(theta(5,:)),'-o','color',col(3,:),'linewidth',1.5);
         title('abs(path ab)'); xlabel('PDM #');
-        
-        subplot(1,4,4);
-        plot(theta(2,:),'-o','color',col(4,:),'linewidth',1.5);
-        title('path c'''); xlabel('PDM #');
-        
+
         ax=findobj(gcf,'Type','axes');
         set(ax,'xlim',[0.5 size(theta,2)+0.5],'FontSize',12,'Xtick',1:size(theta,2));
+        drawnow;
     end
 
 end
