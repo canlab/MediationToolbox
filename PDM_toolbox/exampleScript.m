@@ -7,8 +7,8 @@
 % Available at: https://academic.oup.com/biostatistics/article/doi/10.1093/biostatistics/kxx027/3868977/High-dimensional-multivariate-mediation-with [Accessed August 8, 2017].
 % 
 % Geuter S, Losin EAR, Roy M, Atlas LY, Schmidt L, Krishnan A, Koban L, 
-% Wager TD, Lindquist MA (under review) Beyond the pain matrix - a 
-% comprehensive analysis of brain mediators of pain.
+% Wager TD, Lindquist MA (2018) Multiple brain networks mediating 
+% stimulus-pain relationships in humans. bioRxiv:298927.
 %
 %
 
@@ -58,38 +58,38 @@ pdm = multivariateMediation(xx,yy,mm,'noPDMestimation','B',25);
 
 %% Compute the multivariate brain mediators
 
-% use previous PVD data and compute 5 PDMs [default]
-pdm = multivariateMediation(pdm);
+% use previous PVD dimension reduction, compute all 25 PDMs, and plot path coeff
+pdm = multivariateMediation(pdm,'nPDM',25,'plots');
 
-
-% compute 10 PDMs but not the jointPDM
-pdm = multivariateMediation(pdm,'nPDM',10,'jpdm',false);
-
-
-% redo the PVD with 20 components and compute 5 PDMs + jointPDM
-pdm = multivariateMediation(xx,yy,mm,'B',20);
-
+% select the number of PDMs (3) based on the |ab| coeff plot, like a scree-plot
+pdm = multivariateMediation(pdm,'nPDM',3);
 
 
 %% bootstrap voxel weights for significance
 
 % bootstrap the first PDM with 100 samples
-pdm = multivariateMediation(pdm,'bootPDM',1,'Bsamp',100);
+pdm = multivariateMediation(pdm,'noPDMestimation','bootPDM',1,'Bsamp',100);
 
 
-% do PVD, compute 5 PDMs, and bootstrap weights for the first two PDMs 
-% with 500 samples [use 5,000 or more samples for real studies]. 
+%%
+% you can also do everything in one call:
+% PVD, compute 3 PDMs, and bootstrap all PDMs 
+% with 100 samples [use 5,000 or more samples for real studies]. 
 % Save results to file 'PDMresults.mat'
-pdm = multivariateMediation(xx,yy,mm,'B',20,'nPDM',5,'bootPDM',1:2,'Bsamp',500,'save2file','PDMresults.mat');
+pdm = multivariateMediation(xx,yy,mm,'B',25,'nPDM',3,'bootPDM',1:3,'bootJPDM','Bsamp',100,'save2file','PDMresults.mat');
 
 
 %% visualize the results
 close all;
 
 % visualize PDM1
-mask = 'brainmask.nii'; % mask used for data extraction. needs to match the voxels in mm{i} and pdm.Wfull
+mask = which('brainmask.nii'); % mask used for data extraction. needs to match the voxels in mm{i} and pdm.Wfull
 dat = fmri_data(mask,mask,'noverbose');
 
+[obj,figh] = plotPDM(pdm,dat);
+
+
+%% visualize PDMs (manually)
 % threshold PDM1 at p<0.01
 dat.dat = pdm.Wfull{1}.*(pdm.boot.p{1}<0.01);
 

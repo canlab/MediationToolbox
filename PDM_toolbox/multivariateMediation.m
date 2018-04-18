@@ -210,7 +210,7 @@ for j=optInStart:numel(varargin)
                     bootAllPDM = 0;
                 end
                 
-            case {'bootjdpm','bootjointpdm'}, doBootJPDM = 1;
+            case {'bootjpdm','bootjointpdm'}, doBootJPDM = 1;
                 
             case {'bsamp'}, Bsamp = varargin{j+1}; varargin{j+1} = [];
                 

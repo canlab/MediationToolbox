@@ -100,7 +100,8 @@ end
 % collect output
 pdm.pThreshold = pTAll;
 pdm.pType = sigMethod;
-pdm.WfullThresh = WfSig;
-pdm.WfullJointThresh = WJSig;
+if exist('WfSig','var'), pdm.WfullThresh = WfSig; end
+if exist('WJSig','var'), pdm.WfullJointThresh = WJSig; end
+
 
 
