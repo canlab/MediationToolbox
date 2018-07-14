@@ -140,6 +140,7 @@ function med_results = mediation_brain(X, Y, M, varargin)
     fprintf('Rank data: %s\n', ynstr{dorank + 1});
     fprintf('\n')
     
+    
     % --------------------------------------
     % * Get flags for which imgs to save
     %   Initialize SETUP structure for saving options
@@ -155,16 +156,52 @@ function med_results = mediation_brain(X, Y, M, varargin)
     % --------------------------------------
     str = display_string('Reading data.');
 
-    switch cmdstring
-        case 'Search for mediators'
-            [M, maskInfo] = iimg_get_data(maskname, M);
-        case 'Search for indirect influences'
-            [X, maskInfo] = iimg_get_data(maskname, X);
-        case 'Search for mediated outcomes'
-            [Y, maskInfo] = iimg_get_data(maskname, Y);
-        otherwise
-            error('Unknown cmd string "%s".', cmdstring);
+    dolegacy = false;
+    if ~exist('fmri_data.m', 'file') || ~isa(fmri_data(), 'fmri_data')
+        dolegacy = true;
     end
+    
+    if ~dolegacy
+        % We have object-oriented tools installed.
+        % Object-oriented version.  Now reslices mask automatically.
+        
+        mask_obj = fmri_data(maskname, 'noverbose');
+        maskInfo = mask_obj.volInfo;  % uses n_inmask, xyzlist
+        
+        switch cmdstring
+            case 'Search for mediators'
+                data_obj = fmri_data(M, maskname, 'noverbose');
+                M = double(data_obj.dat');
+            case 'Search for indirect influences'
+                data_obj = fmri_data(X, maskname, 'noverbose');
+                X = double(data_obj.dat');
+            case 'Search for mediated outcomes'
+                data_obj = fmri_data(Y, maskname, 'noverbose');
+                Y = double(data_obj.dat');
+            otherwise
+                error('Unknown cmd string "%s".', cmdstring);
+        end
+        
+    else
+        % Legacy version: Does not use object-oriented tools.
+        % No object-oriented tools/CANlab core installed. May cause other
+        % problems
+        warning('CANlab Core Tools not installed. We recommend you install from https://github.com/canlab');
+        
+        switch cmdstring
+            case 'Search for mediators'
+                [M, maskInfo] = iimg_get_data(maskname, M);
+            case 'Search for indirect influences'
+                [X, maskInfo] = iimg_get_data(maskname, X);
+            case 'Search for mediated outcomes'
+                [Y, maskInfo] = iimg_get_data(maskname, Y);
+            otherwise
+                error('Unknown cmd string "%s".', cmdstring);
+        end
+        
+        
+    end % Object-oriented or legacy
+    
     SETUP.maskInfo = maskInfo;
     save mediation_SETUP SETUP
 
@@ -210,9 +247,19 @@ function med_results = mediation_brain(X, Y, M, varargin)
     %   4 c   X -> Y relationship
     %   5 ab  mediated X -> Y by M (a * b)
 
-    z = maskInfo.xyzlist(:,3);
-    nslices = max(z);
+    if dolegacy
 
+        z = maskInfo.xyzlist(:,3);
+        
+    else
+        
+        z = double(maskInfo.image_indx);
+        z(maskInfo.wh_inmask) = maskInfo.xyzlist(:, 3);
+        
+    end
+
+    nslices = max(z);
+     
     str = display_string('Statistics.');
     spm_progress_bar('init');
 

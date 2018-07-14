@@ -126,8 +126,19 @@ end
         disp('Calculating FDR threshold across family of tests in these images:')
         disp(imgs)
 
-        if ~exist(mask, 'file'), error('Cannot find mask image file.'); end
-        maskInfo = iimg_read_img(mask, 2);
+        if exist(fullfile(pwd, mask), 'file')
+            maskInfo = iimg_read_img(mask, 2);
+        else
+            
+            % Don't have saved mask, use default brain mask\
+            % resample to current space
+             maskobj = fmri_data(which('gray_matter_mask.img'), [], 'noverbose');
+             datobj = fmri_data(deblank(imgs(1, :)), [], 'noverbose');
+             maskobj = resample_space(maskobj, datobj);
+             maskInfo = maskobj.volInfo;
+             
+        end
+        
 
         pvals = iimg_get_data(maskInfo, imgs);
         fdr_p_thresh = FDR(pvals(:), .05);
