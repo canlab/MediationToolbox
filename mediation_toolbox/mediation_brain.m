@@ -166,21 +166,28 @@ function med_results = mediation_brain(X, Y, M, varargin)
         % Object-oriented version.  Now reslices mask automatically.
         
         mask_obj = fmri_data(maskname, 'noverbose');
-        maskInfo = mask_obj.volInfo;  % uses n_inmask, xyzlist
-        
+
         switch cmdstring
             case 'Search for mediators'
                 data_obj = fmri_data(M, maskname, 'noverbose');
                 M = double(data_obj.dat');
+                
             case 'Search for indirect influences'
                 data_obj = fmri_data(X, maskname, 'noverbose');
                 X = double(data_obj.dat');
+                
             case 'Search for mediated outcomes'
                 data_obj = fmri_data(Y, maskname, 'noverbose');
                 Y = double(data_obj.dat');
             otherwise
                 error('Unknown cmd string "%s".', cmdstring);
         end
+        
+        % resample mask to make sure in same space
+        % 
+                
+        mask_obj = resample_space(mask_obj, data_obj, 'noverbose');
+        maskInfo = mask_obj.volInfo;  % uses n_inmask, xyzlist
         
     else
         % Legacy version: Does not use object-oriented tools.
@@ -198,8 +205,7 @@ function med_results = mediation_brain(X, Y, M, varargin)
             otherwise
                 error('Unknown cmd string "%s".', cmdstring);
         end
-        
-        
+
     end % Object-oriented or legacy
     
     SETUP.maskInfo = maskInfo;
@@ -253,8 +259,10 @@ function med_results = mediation_brain(X, Y, M, varargin)
         
     else
         
-        z = double(maskInfo.image_indx);
-        z(maskInfo.wh_inmask) = maskInfo.xyzlist(:, 3);
+        z = data_obj.volInfo.xyzlist(:, 3); % for in-mask voxels only
+        
+%         z = double(maskInfo.image_indx);
+%         z(maskInfo.wh_inmask) = maskInfo.xyzlist(:, 3);
         
     end
 

@@ -1,5 +1,4 @@
 function mediation_brain_results_report(varargin)
-%
 % This function runs and saves tables, images, and clusters
 % for a, b, and ab effects of a two-level mediation model
 % 
@@ -16,7 +15,7 @@ function mediation_brain_results_report(varargin)
 % One at .01, and one with an across-contrast FDR correction at q < .05
 %
 % See also: mediation_brain_results_all_script.m
-%           publish_mediation_brain_results_report.m
+%           publish_mediation_report.m
 
 % Default options - could be changed later
 % --------------------------------------------------------
@@ -24,8 +23,6 @@ function mediation_brain_results_report(varargin)
 whmontage = 5;  % which montage to put name on
 kthresh = 3;    % cluster extent threshold
 pthresh = .01;  % P-value threshold for uncorrected results
-
-
 
 % Display helper functions: Called by later scripts
 % --------------------------------------------------------
@@ -48,98 +45,124 @@ disp(SETUP)
 
 % Initialize fmridisplay if needed and show mask
 % --------------------------------------------------------------------
+printhdr('Mask for analysis:');
 [o2, fig_number] = setup_slice_display([], 1);
-o2 = addblobs(o2, region(mask_obj), 'trans');
+addblobs(o2, region(mask_obj), 'trans');
 
 drawnow, snapnow
 
-
 %% FDR-corrected results
 % ----------------------------------------------------------------
-[o2, fig_number] = setup_slice_display([], 3);
 
 printhdr('FDR-corrected results');
 disp('Results corrected across set of a, b, ab images using mediation_brain_corrected_threshold');
 fprintf('FDR q < .05 = p < %3.8f\n', SETUP.fdr_p_thresh);
 
+%% Path a results table, FDR-corrected 
+
 printhdr('Path a, FDR-corrected q < .05')
 
 a_obj = threshold(a_obj, SETUP.fdr_p_thresh, 'unc', 'k', kthresh);
-o2 = addblobs(o2, region(a_obj), 'wh_montages', 1:2);
-axes(o2.montage{2}.axis_handles(whmontage))
-title('Path a');
 
 a_regions_fdr = region(a_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
 table(a_regions_fdr);                             % Print table
 fprintf('\n\n');
 
+%% Path b results table, FDR-corrected 
+
 printhdr('Path b, FDR-corrected q < .05')
 
 b_obj = threshold(b_obj, SETUP.fdr_p_thresh, 'unc', 'k', kthresh);
-o2 = addblobs(o2, region(b_obj), 'wh_montages', 3:4);
-axes(o2.montage{4}.axis_handles(whmontage))
-title('Path b');
 
 b_regions_fdr = region(b_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
 table(b_regions_fdr);                             % Print table
 fprintf('\n\n');
 
+%% Path ab results table, FDR-corrected 
+
 printhdr('Path ab, FDR-corrected q < .05')
 
 ab_obj = threshold(ab_obj, SETUP.fdr_p_thresh, 'unc', 'k', kthresh);
-o2 = addblobs(o2, region(ab_obj), 'wh_montages', 5:6);
-axes(o2.montage{6}.axis_handles(whmontage))
-title('Path ab');
 
 ab_regions_fdr = region(ab_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
 table(ab_regions_fdr);                             % Print table
 fprintf('\n\n');
+
+%% Montage plot with slices, FDR-corrected
+
+[o2, fig_number] = setup_slice_display([], 3);
+
+o2 = addblobs(o2, region(a_obj), 'wh_montages', 1:2);
+axes(o2.montage{2}.axis_handles(whmontage))
+title('Path a');
+
+o2 = addblobs(o2, region(b_obj), 'wh_montages', 3:4);
+axes(o2.montage{4}.axis_handles(whmontage))
+title('Path b');
+
+o2 = addblobs(o2, region(ab_obj), 'wh_montages', 5:6);
+axes(o2.montage{6}.axis_handles(whmontage))
+title('Path ab');
 
 drawnow, snapnow  % flush figure to report
 
 
 %% Uncorrected results
 % ----------------------------------------------------------------
-[o2, fig_number] = setup_slice_display([], 3);
 
 printhdr('Uncorrected (p < .01)  results');
+
+%% Path a results table, uncorrected 
 
 printhdr('Path a, Uncorrected (p < .01)')
 
 a_obj = threshold(a_obj, pthresh, 'unc', 'k', kthresh);
-o2 = addblobs(o2, region(a_obj), 'wh_montages', 1:2);
-axes(o2.montage{2}.axis_handles(whmontage))
-title('Path a');
 
 a_regions_01unc = region(a_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
 table(a_regions_01unc);                             % Print table
 fprintf('\n\n');
 
+%% Path b results table, uncorrected 
+
 printhdr('Path b, Uncorrected (p < .01)')
 
 b_obj = threshold(b_obj, pthresh, 'unc', 'k', kthresh);
-o2 = addblobs(o2, region(b_obj), 'wh_montages', 3:4);
-axes(o2.montage{4}.axis_handles(whmontage))
-title('Path b');
 
 b_regions_01unc = region(b_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
 table(b_regions_01unc);                             % Print table
 fprintf('\n\n');
 
+%% Path ab results table, uncorrected 
+
 printhdr('Path ab, Uncorrected (p < .01)')
 
 ab_obj = threshold(ab_obj, pthresh, 'unc', 'k', kthresh);
-o2 = addblobs(o2, region(ab_obj), 'wh_montages', 5:6);
-axes(o2.montage{6}.axis_handles(whmontage))
-title('Path ab');
 
 ab_regions_01unc = region(ab_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
 table(ab_regions_01unc);                             % Print table
 fprintf('\n\n');
 
+%% Montage plot with slices, uncorrected
+
+[o2, fig_number] = setup_slice_display([], 3);
+
+o2 = addblobs(o2, region(a_obj), 'wh_montages', 1:2);
+axes(o2.montage{2}.axis_handles(whmontage))
+title('Path a');
+
+o2 = addblobs(o2, region(b_obj), 'wh_montages', 3:4);
+axes(o2.montage{4}.axis_handles(whmontage))
+title('Path b');
+
+o2 = addblobs(o2, region(ab_obj), 'wh_montages', 5:6);
+axes(o2.montage{6}.axis_handles(whmontage))
+title('Path ab');
+
 drawnow, snapnow  % flush figure to report
 
 
+
+%% Savefile information for objects with extracted data
 
 % Save
 % ---------------------------------------------------------------------
@@ -151,9 +174,14 @@ disp('a_regions_unc, etc.  : region objects for paths a, b, ab at uncorrected th
 disp('In region objects, region_obj(i).dat contains extracted data for the i-th significant region, averaged over voxels');
 disp('Use these data in plots, secondary analyses, or to re-run mediation.m within individual regions');
 
-savefilename = fullfile(pwd, 'Statistic_image_and_region_objects.mat');
+cldir = fullfile(pwd, 'clusters_with_extracted_data');
+if ~exist(cldir, 'dir'), mkdir(cldir); end
+
+savefilename = fullfile(cldir, 'Statistic_image_and_region_objects.mat');
 
 save(savefilename, 'a_*', 'b_*', 'ab_*'); 
+
+fprintf('Saved objects in:\n%s\n', savefilename)
 
 fprintf('\n\n');
     

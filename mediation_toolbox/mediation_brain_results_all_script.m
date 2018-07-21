@@ -3,12 +3,25 @@
 %
 % The thresholds are fixed right now, and two sets of results are run:
 % One at .001, and one with an across-contrast FDR correction at q < .05
-
-% Set mask and underlay image: uses those in EXPT.mask and EXPT.overlay if
+%
+% - Reports all paths (a, b, ab), conjunctions, and 2nd-level moderators if
+% available.
+%
+% - Set mask and underlay image: uses those in EXPT.mask and EXPT.overlay if
 % available
-% create EXPT variable with results mask and overlay before running this script if desired,
+% - create EXPT variable with results mask and overlay before running this script if desired,
 % or else the script will try to find default options stored with the
 % mediation_SETUP.mat file
+%
+% clpos_data and clneg_data contain clusters of significant results, with
+% data extracted and stored in the clusters structure. This data can be
+% reused later to re-run mediation in ROIs, etc.
+%
+% For an updated version that prints HTML reports, but with less functionality so far,
+% See also:
+% publish_mediation_report.m
+% mediation_brain_results_report.m
+
 
 % Load SETUP
 % ----------------------------------------------------------------
@@ -194,6 +207,10 @@ else
     % close figures
     close, close, close
     
+    % Separate paths
+    % -------------------------------------------------------------------------
+
+
     fprintf('%s\n%s\nMEDIATION: PATH A\n%s\n%s\n\n', zstr, zstr, zstr, zstr);
     
     [clpos, clneg, clpos_data, clneg_data, clpp2, clnn2] = mediation_brain_results ...
@@ -221,6 +238,10 @@ else
     % close figures
     close, close, close
     
+    % Level-2 moderators
+    % -------------------------------------------------------------------------
+
+
     if exist(fullfile(pwd, 'ap_L2mod.img'), 'file')
         
         fprintf('%s\n%s\nMEDIATION 2ND LEVEL MODERATOR: PATH A\n%s\n%s\n\n', zstr, zstr, zstr, zstr);
@@ -253,3 +274,26 @@ else
     end
     
 end
+
+
+% Clean up: Move files to subdirectories
+% -------------------------------------------------------------------------
+
+figdir = fullfile(pwd, 'figures');
+if ~exist(figdir, 'dir'), mkdir(figdir); end
+[SUCCESS,MESSAGE,MESSAGEID] = movefile('*.png', figdir);
+
+logdir = fullfile(pwd, 'results_logs');
+if ~exist(logdir, 'dir'), mkdir(logdir); end
+[SUCCESS,MESSAGE,MESSAGEID] = movefile('*_log.txt', logdir);
+
+tabledir = fullfile(pwd, 'results_tables');
+if ~exist(tabledir, 'dir'), mkdir(tabledir); end
+[SUCCESS,MESSAGE,MESSAGEID] = movefile('*_results.txt', tabledir);
+
+cldir = fullfile(pwd, 'clusters_with_extracted_data');
+if ~exist(cldir, 'dir'), mkdir(cldir); end
+[SUCCESS,MESSAGE,MESSAGEID] = movefile('*_prune.mat', cldir);
+[SUCCESS,MESSAGE,MESSAGEID] = movefile('*_clusters.mat', cldir);
+
+

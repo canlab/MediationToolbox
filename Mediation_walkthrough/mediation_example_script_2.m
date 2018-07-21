@@ -84,19 +84,25 @@ andir = 'Test_mediation';
 mkdir(andir)
 cd(andir)
 
-%% 4. Run the sample mediation:
+%% 4a. Run the mediation with OLS (quick):
 % ---------------------------------------------------------------------
-
 % Fast version: No bootstrapping. Good for a preliminary check:
 
 results = mediation_brain(SETUP.X, SETUP.Y, img_names, 'names', {'IFG' 'ReappSuccess' 'BrainMediator'}, 'mask', mask_name);
 
+%% 4b. Run the mediation with bootstrapping:
+% ---------------------------------------------------------------------
 % Slow version: Good for final results. For FINAL results, we recommend
 % 10,000 bootstrap samples
 
-results = mediation_brain(SETUP.X, SETUP.Y, img_names, 'names', {'IFG' 'ReappSuccess' 'BrainMediator'}, 'mask', mask_name, 'boot', 'pvals', 5);
+results = mediation_brain(SETUP.X, SETUP.Y, img_names, 'names', {'IFG' 'ReappSuccess' 'BrainMediator'}, 'mask', mask_name, 'boot', 'pvals', 5, 'bootsamples', 1000);
 
-%% 5. Get results:
+%% 5. Get results and publish an HTML report:
+% ---------------------------------------------------------------------
+
+publish_mediation_report
+
+%% 6. Get and save results (older format but nore complete):
 % ---------------------------------------------------------------------
 
 mediation_brain_results_all_script;
