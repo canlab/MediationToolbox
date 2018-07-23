@@ -65,11 +65,11 @@ results = mediation_brain(x,y,imgs,'names',names,'mask', mask);
 % ---------------------------------
 % Uncomment the lines below to run with bootstrapping
 
-%Make yourself a cup of tea while the results are compiled as this is going to take a while
+% Make yourself a cup of tea while the results are compiled as this is going to take a while
 % pre-compiled results are also available in
 % 'mediation_Example_Data_Wager2008_Msearch_R_XisRIFGstim_norobust'
 
-% results = mediation_brain(x,y,imgs,'names',names,'mask', mask,'boot','pvals',5);
+results = mediation_brain(x,y,imgs,'names',names,'mask', mask,'boot','pvals',5);
 
 %% Step 9
 % ---------------------------------

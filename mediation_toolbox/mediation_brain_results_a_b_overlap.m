@@ -74,161 +74,219 @@ negimagename = ['intersect_aneg_bneg_' mystr '.img'];
 % input images
 imgs = char('X-M_effect.img', 'X-M_pvals.img', 'M-Y_effect.img', 'M-Y_pvals.img');
 
-volInfo = iimg_read_img(mask, 2);
-dat = iimg_get_data(volInfo, imgs);  % rows are images
+mask_obj = fmri_data(mask, 'noverbose');
 
-% compute it
-pdat = all(dat([2 4], :) < p);
-signdat = sign(dat([1 3], :));
+effect_obj = fmri_data(char('X-M_effect.img', 'M-Y_effect.img'), 'noverbose');
+p_obj = fmri_data(char('X-M_pvals.img', 'M-Y_pvals.img'), 'noverbose');
+%p_obj.dat(p_obj.dat == 0) = 1;  % resampling will otherwise make some 0 values look valid
 
-% valid_vox = double(pdat & all(signdat > 0))';
-% [cl_apos_bpos, datpospos] = iimg_indx2clusters(valid_vox, volInfo, .5, k);
-% 
-% valid_vox = double(pdat & all(signdat > 0))';
-% [cl_aneg_bneg, datnegneg] = iimg_indx2clusters(valid_vox, volInfo, .5, k);
+% apply mask
+mask_obj = resample_space(mask_obj, effect_obj);
+effect_obj = apply_mask(effect_obj, mask_obj);
+p_obj = apply_mask(p_obj, mask_obj);
 
+% compute overlap
+bothsig = all(double(p_obj.dat) < p & double(p_obj.dat) > 0, 2); % vox where p-vals are low enough in both images
 
-str = ['i1>0 & i2< ' num2str(p) ' & i3>0 & i4<' num2str(p) ' & ~isnan(i1) & ~isnan(i2) & i5 > .5'];
-cl_apos_bpos = mask_intersection2(k, posimagename, char(imgs, mask), str);
+bothpos = bothsig & all(effect_obj.dat > 0, 2);
+obj = effect_obj;
+obj.dat = single(bothpos);
+r = region(obj, 'noverbose');
+wh_omit = cat(1, r.numVox) < k;
+r(wh_omit) = [];
+cl_apos_bpos = r;
 
-str = ['i1<0 & i2< ' num2str(p) ' & i3<0 & i4<' num2str(p) ' & ~isnan(i1) & ~isnan(i2) & i5 > .5'];
-cl_aneg_bneg = mask_intersection2(k, negimagename, char(imgs, mask), str);
+bothneg = bothsig & all(effect_obj.dat < 0, 2);
+obj = effect_obj;
+obj.dat = single(bothpos);
+r = region(obj, 'noverbose');
+wh_omit = cat(1, r.numVox) < k;
+r(wh_omit) = [];
+cl_aneg_bneg = r;
 
+aposbneg = bothsig & effect_obj.dat(:, 1) > 0 & effect_obj.dat(:, 2) < 0;
+obj = effect_obj;
+obj.dat = single(aposbneg);
+r = region(obj, 'noverbose');
+wh_omit = cat(1, r.numVox) < k;
+r(wh_omit) = [];
+cl_apos_bneg = r;
 
-cluster_orthviews(cl_apos_bpos, {[1 0 0]}, 'overlay', overlay);
-cluster_orthviews(cl_aneg_bneg, {[0 0 1]}, 'add');
+bposaneg = bothsig & effect_obj.dat(:, 2) > 0 & effect_obj.dat(:, 1) < 0;
+obj = effect_obj;
+obj.dat = single(bposaneg);
+r = region(obj, 'noverbose');
+wh_omit = cat(1, r.numVox) < k;
+r(wh_omit) = [];
+cl_aneg_bpos = r;
 
+%
+% effect_obj = resample_space(effect_obj, mask_obj);
+% p_obj = resample_space(p_obj, mask_obj);
 
-if doslices && ~isempty(cl_apos_bpos) && ~isempty(cl_aneg_bneg)
-    cluster_orthviews_showcenters([cl_apos_bpos cl_aneg_bneg], 'axial', overlay, 0, 1);
-    h = findobj(gcf,'Type', 'text','Color', 'g');
-    delete(h)
-    h = findobj(gcf,'Type', 'text','Color', 'k');
-    delete(h)
-    enlarge_axes(gcf, 1.15)
-    enlarge_axes(gcf, 1, 1.05)
+%% Plot
+
+if doslices
+    
+    % Plot 1
+    
+    create_figure('overlap');
+    axis off
+    o2 = canlab_results_fmridisplay;
+    
+    o2 = montage(cl_apos_bpos, 'o2', o2, 'color', [1 0 0]);
+    o2 = montage(cl_aneg_bneg, 'o2', o2, 'color', [0 0 1]);
+    
+    o2 = montage(cl_apos_bneg, 'o2', o2, 'color', [1 1 0]);
+    o2 = montage(cl_aneg_bpos, 'o2', o2, 'color', [0 1 0]);
+    
     if dosave
-        saveas(gcf,['intersect_ ' mystr '_a_and_b_axial'], 'png')
+        saveas(gcf, ['intersect_' mystr '_a_and_b'], 'png')
     end
 
-    cluster_orthviews_showcenters([cl_apos_bpos cl_aneg_bneg], 'sagittal', overlay, 0, 1);
-    h = findobj(gcf,'Type', 'text','Color', 'g');
-    delete(h)
-    h = findobj(gcf,'Type', 'text','Color', 'k');
-    delete(h)
-    enlarge_axes(gcf, 1.15)
-    enlarge_axes(gcf, 1, 1.05)
+    % Plot 2
+    
+    o2 = montage(cl_apos_bpos, 'color', [1 0 0], 'montagetype', 'regioncenters');
+      
     if dosave
-        saveas(gcf,['intersect_' mystr '_a_and_b_sagittal'], 'png')
+        saveas(gcf, ['intersect_' mystr '_aposbpos_regioncenters'], 'png')
     end
     
-    cluster_orthviews_showcenters([cl_apos_bpos cl_aneg_bneg], 'coronal', overlay, 0, 1);
-    h = findobj(gcf,'Type', 'text','Color', 'g');
-    delete(h)
-    h = findobj(gcf,'Type', 'text','Color', 'k');
-    delete(h)
-    enlarge_axes(gcf, 1.15)
-    enlarge_axes(gcf, 1, 1.05)
+    % Plot 3
+    
+    o2 = montage(cl_aneg_bneg, 'color', [0 0 1], 'montagetype', 'regioncenters');
+    
     if dosave
-        saveas(gcf,['intersect_' mystr '_a_and_b_coronal'], 'png')
+        saveas(gcf, ['intersect_' mystr '_anegbneg_regioncenters'], 'png')
     end
+    
+    
+    
 end
-%% inconsistent
 
-str = ['i1>0 & i2< ' num2str(p) ' & i3<0 & i4<' num2str(p) ' & ~isnan(i1) & ~isnan(i2) & i5 > .5'];
-cl_apos_bneg = mask_intersection2(k, 'intersect_apos_bneg.img', char(imgs, mask), str);
 
-str = ['i1<0 & i2< ' num2str(p) ' & i3>0 & i4<' num2str(p) ' & ~isnan(i1) & ~isnan(i2) & i5 > .5'];
-cl_aneg_bpos = mask_intersection2(k, 'intersect_aneg_bpos.img', char(imgs, mask), str);
-
-cluster_orthviews(cl_apos_bneg, {[0 1 0]}, 'add');
-cluster_orthviews(cl_aneg_bpos, {[.5 1 .5]}, 'add');
+%% Save
 
 if dosave
-    save intersect_a_and_b_clusters cl_*
+    
+    pstr = strrep(num2str(p), '0.', '');
+    
+    myfilename = sprintf('intersect_a_and_b_clusters_%s_k%d', pstr, k);
+    
+    fprintf('Saving clusters with extracted data in:\n%s\n', myfilename)
+    
+    save(myfilename, 'cl_*');
+    
 end
 
-% Extract
+%% Extract
 
-% fix for diffs in how single-level and multi-level data are stored
-if ~isfield(SETUP, 'data')
-    SETUP.data.M = {SETUP.M};
+switch SETUP.cmdstring
+    case 'Search for mediators'
+        data_obj = fmri_data(SETUP.M, mask, 'noverbose');
+        
+    case 'Search for indirect influences'
+        data_obj = fmri_data(SETUP.X, mask, 'noverbose');
+        
+    case 'Search for mediated outcomes'
+        data_obj = fmri_data(SETUP.Y, mask, 'noverbose');
+    otherwise
+        error('Unknown cmd string "%s".', cmdstring);
 end
 
-if ~isempty(cl_apos_bpos)
-    cl_apos_bpos = extract_raw_data([], cl_apos_bpos, 'extract_from', SETUP.data.M, 'noraw');
-end
+% resample to mask to make sure in same space
 
-if ~isempty(cl_aneg_bneg)
-    cl_aneg_bneg = extract_raw_data([], cl_aneg_bneg, 'extract_from', SETUP.data.M, 'noraw');
-end
+data_obj = resample_space(data_obj, mask_obj, 'noverbose');
 
-if ~isempty(cl_apos_bneg)
-    cl_apos_bneg = extract_raw_data([], cl_apos_bneg, 'extract_from', SETUP.data.M, 'noraw');
-end
+cl_apos_bpos = extract_data(cl_apos_bpos, data_obj);
+cl_aneg_bneg = extract_data(cl_aneg_bneg, data_obj);
 
-if ~isempty(cl_aneg_bpos)
-    cl_aneg_bpos = extract_raw_data([], cl_aneg_bpos, 'extract_from', SETUP.data.M, 'noraw');
-end
+cl_apos_bneg = extract_data(cl_apos_bneg, data_obj);
+cl_aneg_bpos = extract_data(cl_aneg_bpos, data_obj);
 
-if ~isfield(cl_apos_bpos, 'all_data')
-    % we have not extracted data successfully; skip by doing nothing
-else
-    for i = 1:length(cl_apos_bpos)
-        k = size(cl_apos_bpos(i).all_data, 2);
-
-        cl_apos_bpos(i).timeseries = cell(1, k);
-
-        for j = 1:k
-            cl_apos_bpos(i).timeseries{j} = cl_apos_bpos(i).all_data(:, j);
-        end
-    end
-end
-
-if ~isfield(cl_aneg_bneg, 'all_data')
-    % we have not extracted data successfully; skip by doing nothing
-else
-    for i = 1:length(cl_aneg_bneg)
-        k = size(cl_aneg_bneg(i).all_data, 2);
-
-        cl_aneg_bneg(i).timeseries = cell(1, k);
-
-        for j = 1:k
-            cl_aneg_bneg(i).timeseries{j} = cl_aneg_bneg(i).all_data(:, j);
-        end
-    end
-end
-
-if ~isfield(cl_apos_bneg, 'all_data')
-    % we have not extracted data successfully; skip by doing nothing
-else
-    for i = 1:length(cl_apos_bneg)
-        k = size(cl_apos_bneg(i).all_data, 2);
-
-        cl_apos_bneg(i).timeseries = cell(1, k);
-
-        for j = 1:k
-            cl_apos_bneg(i).timeseries{j} = cl_apos_bneg(i).all_data(:, j);
-        end
-    end
-end
-
-if ~isfield(cl_aneg_bpos, 'all_data')
-    % we have not extracted data successfully; skip by doing nothing
-else
-    for i = 1:length(cl_aneg_bpos)
-        k = size(cl_aneg_bpos(i).all_data, 2);
-
-        cl_aneg_bpos(i).timeseries = cell(1, k);
-
-        for j = 1:k
-            cl_aneg_bpos(i).timeseries{j} = cl_aneg_bpos(i).all_data(:, j);
-        end
-    end
-end
-
+  
 if dosave
     save intersect_a_and_b_clusters -append cl*
 end
+
+
+%%
+% 
+% % fix for diffs in how single-level and multi-level data are stored
+% if ~isfield(SETUP, 'data')
+%     SETUP.data.M = {SETUP.M};
+% end
+% 
+% if ~isempty(cl_apos_bpos)
+%     cl_apos_bpos = extract_raw_data([], cl_apos_bpos, 'extract_from', SETUP.data.M, 'noraw');
+% end
+% 
+% if ~isempty(cl_aneg_bneg)
+%     cl_aneg_bneg = extract_raw_data([], cl_aneg_bneg, 'extract_from', SETUP.data.M, 'noraw');
+% end
+% 
+% if ~isempty(cl_apos_bneg)
+%     cl_apos_bneg = extract_raw_data([], cl_apos_bneg, 'extract_from', SETUP.data.M, 'noraw');
+% end
+% 
+% if ~isempty(cl_aneg_bpos)
+%     cl_aneg_bpos = extract_raw_data([], cl_aneg_bpos, 'extract_from', SETUP.data.M, 'noraw');
+% end
+% 
+% if ~isfield(cl_apos_bpos, 'all_data')
+%     % we have not extracted data successfully; skip by doing nothing
+% else
+%     for i = 1:length(cl_apos_bpos)
+%         k = size(cl_apos_bpos(i).all_data, 2);
+% 
+%         cl_apos_bpos(i).timeseries = cell(1, k);
+% 
+%         for j = 1:k
+%             cl_apos_bpos(i).timeseries{j} = cl_apos_bpos(i).all_data(:, j);
+%         end
+%     end
+% end
+% 
+% if ~isfield(cl_aneg_bneg, 'all_data')
+%     % we have not extracted data successfully; skip by doing nothing
+% else
+%     for i = 1:length(cl_aneg_bneg)
+%         k = size(cl_aneg_bneg(i).all_data, 2);
+% 
+%         cl_aneg_bneg(i).timeseries = cell(1, k);
+% 
+%         for j = 1:k
+%             cl_aneg_bneg(i).timeseries{j} = cl_aneg_bneg(i).all_data(:, j);
+%         end
+%     end
+% end
+% 
+% if ~isfield(cl_apos_bneg, 'all_data')
+%     % we have not extracted data successfully; skip by doing nothing
+% else
+%     for i = 1:length(cl_apos_bneg)
+%         k = size(cl_apos_bneg(i).all_data, 2);
+% 
+%         cl_apos_bneg(i).timeseries = cell(1, k);
+% 
+%         for j = 1:k
+%             cl_apos_bneg(i).timeseries{j} = cl_apos_bneg(i).all_data(:, j);
+%         end
+%     end
+% end
+% 
+% if ~isfield(cl_aneg_bpos, 'all_data')
+%     % we have not extracted data successfully; skip by doing nothing
+% else
+%     for i = 1:length(cl_aneg_bpos)
+%         k = size(cl_aneg_bpos(i).all_data, 2);
+% 
+%         cl_aneg_bpos(i).timeseries = cell(1, k);
+% 
+%         for j = 1:k
+%             cl_aneg_bpos(i).timeseries{j} = cl_aneg_bpos(i).all_data(:, j);
+%         end
+%     end
+% end
 
 end % main function
