@@ -15,7 +15,7 @@ fprintf('Creating HTML report for results in:\n%s\n', resultsdir);
 % ------------------------------------------------------------------------
 
 is_mediation_dir = exist(fullfile(resultsdir, 'mediation_SETUP.mat'));
-is_run = exist(fullfile(resultsdir, 'med_results.mat'));
+is_run = exist(fullfile(resultsdir, 'X-M-Y_effect.img'));
 
 if ~is_mediation_dir
     fprintf('%s\nis not a mediation results directory because mediation_SETUP.mat is missing.\nSkipping report.\n', resultsdir);
@@ -23,7 +23,7 @@ if ~is_mediation_dir
 end
 
 if ~is_run
-    fprintf('Mediation does not appear to have run correctly because med_results.mat is missing.\nSkipping report.\n');
+    fprintf('Mediation does not appear to have run correctly because X-M-Y_effect.img is missing.\nSkipping report.\n');
     return
 end
 

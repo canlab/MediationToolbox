@@ -237,11 +237,7 @@ function [clpos, clneg, clpos_data, clneg_data, clpos_data2, clneg_data2] = medi
             % spm_defaults is a script
             disp('WARNING: spm defaults not set for spm2. Make sure your defaults are set correctly');
 
-        case 'SPM5'
-            % spm_defaults is a function
-            spm_defaults()
-
-        case 'SPM8'
+        case {'SPM5' 'SPM8' 'SPM12'}
             % spm_defaults is a function
             spm_defaults()
 
@@ -686,7 +682,7 @@ function [clpos, clneg, clpos_data, clneg_data, clpos_data2, clneg_data2] = medi
     % ---------------------------------------------------
 
     function do_slice_view
-% 
+ 
         if ~exist('clpos_data', 'var') || ~exist('clneg_data', 'var')
             disp('You must request cluster output (clpos_data and clneg_data) to show slices.');
             return
@@ -729,14 +725,12 @@ function [clpos, clneg, clpos_data, clneg_data, clpos_data2, clneg_data2] = medi
         %
         h = findobj(gcf,'Type', 'text','Color', 'g');
         delete(h)
-%         h = findobj(gcf,'Type', 'text','Color', 'k');
-%         delete(h)
-%         enlarge_axes(gcf, 1.15)
-        %enlarge_axes(gcf, 1, 1.05)
+
         if dosave
             disp(['Saving image of slices: orth_' text_tag '_coronal.png'])
             %saveas(gcf,['orth_' text_tag '_coronal'], 'png')
-            print(gcf, '-dpng', '-r400', '-zbuffer', ['orth_' text_tag '_coronal'])
+            %print(gcf, '-dpng', '-r400', '-zbuffer', ['orth_' text_tag '_coronal'])
+            print(gcf, '-dpng', '-r400', ['orth_' text_tag '_coronal'])
         end
 
         if doshowcenters
@@ -747,13 +741,12 @@ function [clpos, clneg, clpos_data, clneg_data, clpos_data2, clneg_data2] = medi
 
         h = findobj(gcf,'Type', 'text','Color', 'g');
         delete(h)
-%         h = findobj(gcf,'Type', 'text','Color', 'k');
-%         delete(h)
-        %enlarge_axes(gcf, 1.10)
+
         if dosave
             disp(['Saving image of slices: orth_' text_tag '_sagittal.png'])
             %saveas(gcf,['orth_' text_tag '_sagittal'], 'png')
-            print(gcf, '-dpng', '-r400', '-zbuffer', ['orth_' text_tag '_sagittal'])
+            %print(gcf, '-dpng', '-r400', '-zbuffer', ['orth_' text_tag '_sagittal'])
+            print(gcf, '-dpng', '-r400', ['orth_' text_tag '_sagittal'])
         end
         
         if doshowcenters
@@ -765,13 +758,13 @@ function [clpos, clneg, clpos_data, clneg_data, clpos_data2, clneg_data2] = medi
 
         h = findobj(gcf,'Type', 'text','Color', 'g');
         delete(h)
-%         h = findobj(gcf,'Type', 'text','Color', 'k');
-%         delete(h)
-        %enlarge_axes(gcf, 1.10)
+
         if dosave
             disp(['Saving image of slices: orth_' text_tag '_axial.png'])
             %saveas(gcf,['orth_' text_tag '_axial'], 'png')
-            print(gcf, '-dpng', '-r400', '-zbuffer', ['orth_' text_tag '_axial'])
+            %print(gcf, '-dpng', '-r400', '-zbuffer', ['orth_' text_tag '_axial'])
+            print(gcf, '-dpng', '-r400', ['orth_' text_tag '_axial'])
+            
         end
 
     end
@@ -924,7 +917,7 @@ function clall = extract_data(clin, meth, domergeclusters, dosubclusters)
             filename = remove_commas_and_spaces(imgs{i}(1, :));
 
             if ~exist(filename, 'file')
-                disp('Image files are not valid files!');
+                disp('Image files are not valid files! Cannot extract data');
                 clsubjects{i} = tor_extract_rois([], clall); %, %clall);
             else
                 clsubjects{i} = tor_extract_rois(imgs{i}, clall); % , clall);

@@ -181,6 +181,23 @@ end
 
 %% Extract
 
+% Different for single or multi-level
+if isfield(SETUP, 'M') % single
+    
+    is_single_level = true;
+    
+elseif  isfield(SETUP, 'data') && isfield(SETUP.data, 'M') % multi
+    
+    is_single_level = false;
+else
+    error('Cannot find either SETUP.M or SETUP.data.M. Incomplete mediation results?')
+end
+
+if ~is_single_level
+    disp('Skipping data extraction from multi-level analysis');
+    return
+end
+
 switch SETUP.cmdstring
     case 'Search for mediators'
         data_obj = fmri_data(SETUP.M, mask, 'noverbose');
