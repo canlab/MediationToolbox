@@ -4,7 +4,7 @@
 % Run this from the main mediation results directory (basedir)
 
 close all
-clear all
+warning off, clear all, warning on 
 
 resultsdir = pwd;
 

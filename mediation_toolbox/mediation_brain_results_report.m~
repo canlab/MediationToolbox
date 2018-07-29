@@ -75,12 +75,12 @@ printhdr('Path a, FDR-corrected q < .05')
 
 a_obj = threshold(a_obj, SETUP.fdr_p_thresh, 'unc', 'k', kthresh);
 
-a_regions_fdr = region(a_obj, data_obj, 'noverbose');                   % Create regions; extract average data in each region into obj.dat
-a_regions_fdr = table(a_regions_fdr);                                   % Print table
+a_regions_fdr = region(a_obj, data_obj, 'noverbose');                    % Create regions; extract average data in each region into obj.dat
+
+table(a_regions_fdr);                             % Print table
 fprintf('\n\n');
 
-montage(a_regions_fdr, 'colormap', 'regioncenters');
-drawnow, snapnow;
+montage(r, 'colormap' 'regioncenters')
 
 %% Path b results table, FDR-corrected 
 
@@ -89,11 +89,8 @@ printhdr('Path b, FDR-corrected q < .05')
 b_obj = threshold(b_obj, SETUP.fdr_p_thresh, 'unc', 'k', kthresh);
 
 b_regions_fdr = region(b_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
-b_regions_fdr = table(b_regions_fdr);                             % Print table
+table(b_regions_fdr);                             % Print table
 fprintf('\n\n');
-
-montage(b_regions_fdr, 'colormap', 'regioncenters');
-drawnow, snapnow;
 
 %% Path ab results table, FDR-corrected 
 
@@ -102,13 +99,10 @@ printhdr('Path ab, FDR-corrected q < .05')
 ab_obj = threshold(ab_obj, SETUP.fdr_p_thresh, 'unc', 'k', kthresh);
 
 ab_regions_fdr = region(ab_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
-ab_regions_fdr = table(ab_regions_fdr);                             % Print table
+table(ab_regions_fdr);                             % Print table
 fprintf('\n\n');
 
-montage(ab_regions_fdr, 'colormap', 'regioncenters');
-drawnow, snapnow;
-
-%% Combined montage plot with slices, FDR-corrected
+%% Montage plot with slices, FDR-corrected
 
 [o2, fig_number] = setup_slice_display([], 3);
 
@@ -142,11 +136,8 @@ printhdr('Path a, Uncorrected (p < .01)')
 a_obj = threshold(a_obj, pthresh, 'unc', 'k', kthresh);
 
 a_regions_01unc = region(a_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
-a_regions_01unc = table(a_regions_01unc);                             % Print table
+table(a_regions_01unc);                             % Print table
 fprintf('\n\n');
-
-montage(a_regions_01unc, 'colormap', 'regioncenters');
-drawnow, snapnow;
 
 %% Path b results table, uncorrected 
 
@@ -155,11 +146,8 @@ printhdr('Path b, Uncorrected (p < .01)')
 b_obj = threshold(b_obj, pthresh, 'unc', 'k', kthresh);
 
 b_regions_01unc = region(b_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
-b_regions_01unc = table(b_regions_01unc);                             % Print table
+table(b_regions_01unc);                             % Print table
 fprintf('\n\n');
-
-montage(b_regions_01unc, 'colormap', 'regioncenters');
-drawnow, snapnow;
 
 %% Path ab results table, uncorrected 
 
@@ -168,11 +156,8 @@ printhdr('Path ab, Uncorrected (p < .01)')
 ab_obj = threshold(ab_obj, pthresh, 'unc', 'k', kthresh);
 
 ab_regions_01unc = region(ab_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
-ab_regions_01unc = table(ab_regions_01unc);                             % Print table
+table(ab_regions_01unc);                             % Print table
 fprintf('\n\n');
-
-montage(ab_regions_01unc, 'colormap', 'regioncenters');
-drawnow, snapnow;
 
 %% Montage plot with slices, uncorrected
 
