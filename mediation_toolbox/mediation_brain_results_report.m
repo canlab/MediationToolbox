@@ -6,6 +6,12 @@ function mediation_brain_results_report(varargin)
 %
 % - Preliminary version: This is "version 1" and does not have the full functionality of 
 % mediation_brain_results_all_script, but is complementary. 
+%   Does not do: 
+%       - Extraction of region data into region objects (sig clusters) for multi-level analyses
+%       - Multiple threshold with pruning 
+%   For these, see mediation_brain_results_all_script
+%   Does do: (which mediation_brain_results_all_script does not) 
+%       - Autolabeling of regions
 %
 % - Saves region objects with extracted data within each region
 % - Requires object oriented tools in CANlab_Core_Tools
@@ -37,6 +43,9 @@ printhdr = @(str) fprintf('%s\n%s\n%s\n', dashes, str, dashes);
 
 printhdr('LOADING mediation results and images');
 
+% load data_obj for single-level only. Multi-level data can be too large to load all
+% objects - extract data on-demand from clusters.
+
 [SETUP, mask_obj, a_obj, b_obj, ab_obj, data_obj] = load_mediation_results_objects; % and run FDR if needed
 
 printhdr('Loaded mediation:');
@@ -47,6 +56,8 @@ disp(SETUP)
 % --------------------------------------------------------------------
 printhdr('Mask for analysis:');
 [o2, fig_number] = setup_slice_display([], 1);
+o2 = title_montage(o2, 2, 'Mask for analysis');
+
 addblobs(o2, region(mask_obj), 'trans');
 
 drawnow, snapnow
@@ -64,7 +75,8 @@ printhdr('Path a, FDR-corrected q < .05')
 
 a_obj = threshold(a_obj, SETUP.fdr_p_thresh, 'unc', 'k', kthresh);
 
-a_regions_fdr = region(a_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
+a_regions_fdr = region(a_obj, data_obj, 'noverbose');                    % Create regions; extract average data in each region into obj.dat
+
 table(a_regions_fdr);                             % Print table
 fprintf('\n\n');
 
@@ -93,19 +105,22 @@ fprintf('\n\n');
 [o2, fig_number] = setup_slice_display([], 3);
 
 o2 = addblobs(o2, region(a_obj), 'wh_montages', 1:2);
-axes(o2.montage{2}.axis_handles(whmontage))
-title('Path a');
+o2 = title_montage(o2, 2, 'Path a');
+
+% axes(o2.montage{2}.axis_handles(whmontage))
+% title('Path a');
 
 o2 = addblobs(o2, region(b_obj), 'wh_montages', 3:4);
-axes(o2.montage{4}.axis_handles(whmontage))
-title('Path b');
+% axes(o2.montage{4}.axis_handles(whmontage))
+% title('Path b');
+o2 = title_montage(o2, 4, 'Path b');
 
 o2 = addblobs(o2, region(ab_obj), 'wh_montages', 5:6);
-axes(o2.montage{6}.axis_handles(whmontage))
-title('Path ab');
+% axes(o2.montage{6}.axis_handles(whmontage))
+% title('Path ab');
+o2 = title_montage(o2, 6, 'Path ab');
 
 drawnow, snapnow  % flush figure to report
-
 
 %% Uncorrected results
 % ----------------------------------------------------------------
@@ -147,16 +162,16 @@ fprintf('\n\n');
 [o2, fig_number] = setup_slice_display([], 3);
 
 o2 = addblobs(o2, region(a_obj), 'wh_montages', 1:2);
-axes(o2.montage{2}.axis_handles(whmontage))
-title('Path a');
+o2 = title_montage(o2, 2, 'Path a');
+
 
 o2 = addblobs(o2, region(b_obj), 'wh_montages', 3:4);
-axes(o2.montage{4}.axis_handles(whmontage))
-title('Path b');
+o2 = title_montage(o2, 4, 'Path b');
+
 
 o2 = addblobs(o2, region(ab_obj), 'wh_montages', 5:6);
-axes(o2.montage{6}.axis_handles(whmontage))
-title('Path ab');
+o2 = title_montage(o2, 6, 'Path ab');
+
 
 drawnow, snapnow  % flush figure to report
 
@@ -198,6 +213,9 @@ end % main function
 
 function [SETUP, mask_obj, a_obj, b_obj, ab_obj, data_obj] = load_mediation_results_objects
 
+% load data_obj for single-level only. Multi-level data can be too large to load all
+% objects - extract data on-demand from clusters.
+
 % Load SETUP
 % ----------------------------------------------------------------
 if ~exist(fullfile(pwd, 'mediation_SETUP.mat'), 'file')
@@ -214,9 +232,12 @@ end
 
 % single or multi-level dir?
 % ----------------------------------------------------------------
-if exist(fullfile(pwd, 'mask.img'), 'file') && isfield(SETUP, 'data') && iscell(SETUP.data.X)  % multilevel mediation dirs have this image
+is_multilev = @(SETUP) exist(fullfile(pwd, 'mask.img'), 'file') && isfield(SETUP, 'data') && iscell(SETUP.data.X);  % multilevel mediation dirs have this image
+
+if is_multilev(SETUP)
     
-    ismultilevel = 1;
+    %ismultilevel = true;
+    
     disp('Using mask.img stored in current directory (automatically written for mediation analyses) for mask.');
     mask = fullfile(pwd, 'mask.img');
     
@@ -224,7 +245,8 @@ elseif isfield(SETUP, 'data') && iscell(SETUP.data.X)
     warning('Multilevel mediation: mask.img is missing');
 else
     % SETUP.X, Y Z instead of SETUP.data
-    ismultilevel = 0;
+    %ismultilevel = false;
+    
     % single-level mask stored here
     mask = SETUP.mask;
     
@@ -246,13 +268,24 @@ a_obj = create_stat_object('X-M_effect.img', 'X-M_pvals.img');
 b_obj = create_stat_object('M-Y_effect.img', 'M-Y_pvals.img');
 ab_obj = create_stat_object('X-M-Y_effect.img', 'X-M-Y_pvals.img');
 
-data_obj = load_image_data_object(SETUP);
+% load for single-level only. Multi-level data can be too large to load all
+% objects - extract data on-demand from clusters.
+
+data_obj = load_image_data_object(SETUP, is_multilev(SETUP));
 
 end
 
 
 
-function data_obj = load_image_data_object(SETUP)
+function data_obj = load_image_data_object(SETUP, is_multilevel)
+
+% load for single-level only. Multi-level data can be too large to load all
+% objects - extract data on-demand from clusters.
+
+if is_multilevel
+    data_obj = [];
+    return
+end
 
 image_names = SETUP.M;
 if ~ischar(image_names), image_names = SETUP.X; end
