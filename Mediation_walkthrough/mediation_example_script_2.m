@@ -7,7 +7,7 @@
 % there.
 
 disp('Mediation example script: Creating a new analysis subfolder and running')
-disp('Sample mediation analysis here:');
+disp('Sample mediation analysis in this folder:');
 
 basedir = pwd;
 disp(basedir);
@@ -75,6 +75,11 @@ img_names = data_obj.fullpath;
 % Alternative: List image names; may not work on all file systems
 % img_names = filenames(fullfile(image_file_path, 'con*img'), 'char');
 
+% Load behavioral data to use
+% SETUP has brain and outcome variables (X and Y) from pre-cooked analysis
+% These input data are saved for all mediation analyses.
+
+load(behavior_file)
 
 %% 3. Create a new test directory to run mediation
 % ---------------------------------------------------------------------
@@ -95,7 +100,7 @@ results = mediation_brain(SETUP.X, SETUP.Y, img_names, 'names', {'IFG' 'ReappSuc
 % Slow version: Good for final results. For FINAL results, we recommend
 % 10,000 bootstrap samples
 
-results = mediation_brain(SETUP.X, SETUP.Y, img_names, 'names', {'IFG' 'ReappSuccess' 'BrainMediator'}, 'mask', mask_name, 'boot', 'pvals', 5, 'bootsamples', 1000);
+% results = mediation_brain(SETUP.X, SETUP.Y, img_names, 'names', {'IFG' 'ReappSuccess' 'BrainMediator'}, 'mask', mask_name, 'boot', 'pvals', 5, 'bootsamples', 1000);
 
 %% 5. Get results and publish an HTML report:
 % ---------------------------------------------------------------------
