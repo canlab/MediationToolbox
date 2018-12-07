@@ -778,12 +778,12 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         
         % reshape values in a right order: added by Wani - 06/28/13
         if domultilev && size(X_2ndlevel,2) > 1
-            stats2.beta = reshape(stats2.beta, 2, size(stats2.mean,2));
-            stats2.p = reshape(stats2.p, 2, size(stats2.mean,2));
-            stats2.z = reshape(stats2.z, 2, size(stats2.mean,2));
-            stats2.ste = reshape(stats2.ste, 2, size(stats2.mean,2));
-            stats2.std = reshape(stats2.std, 2, size(stats2.mean,2));
-            stats2.prctilep = reshape(stats2.prctilep, 2, size(stats2.mean,2));
+            stats2.beta = reshape(stats2.beta, size(X_2ndlevel,2), size(stats2.mean,2));
+            stats2.p = reshape(stats2.p, size(X_2ndlevel,2), size(stats2.mean,2));
+            stats2.z = reshape(stats2.z, size(X_2ndlevel,2), size(stats2.mean,2));
+            stats2.ste = reshape(stats2.ste, size(X_2ndlevel,2), size(stats2.mean,2));
+            stats2.std = reshape(stats2.std, size(X_2ndlevel,2), size(stats2.mean,2));
+            stats2.prctilep = reshape(stats2.prctilep, size(X_2ndlevel,2), size(stats2.mean,2));
             stats2.t = stats2.beta ./ stats2.ste;
         end
 
