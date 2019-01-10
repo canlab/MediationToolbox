@@ -34,8 +34,8 @@ for i = 1:length(varargin)
                  
             % Other arguments used in subfunctions
             case {'noint', 'nointercept'}
-            case 'noind', 
-            case 'samefig',             
+            case 'noind'
+            case 'samefig'             
             case {'weight', 'weighted', 'var', 's2'}
             case 'noweight'
             case 'color'
@@ -110,6 +110,12 @@ else num_additionalM = size(additionalM, 2);
 end
 
 vnames = stats2.inputOptions.vnames;
+
+for i = 1:length(vnames)
+    
+    vnames{i} = strrep(vnames{i}, '_', '');
+    
+end
 
 if iscell(abetas)
     whgood = true(N, 1);

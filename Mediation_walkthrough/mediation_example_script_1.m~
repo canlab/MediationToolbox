@@ -6,14 +6,18 @@
 % ...script1 is very terse, and includes the essential commands only.
 % ...script2 is longer and includes more checking that files are available, etc.
 
-%% Step 1: Make a new analysis directory to save results, and go there
-% Make a new analysis directory to save results, and go there
+close all
+clear all
 
+%% Step 1: Make a new analysis directory to save results, and go there
+% ---------------------------------
+% Make a new analysis directory to save results, and go there
 andir = 'Test_mediation';
 mkdir(andir)
 cd(andir)
 
 %% Step 2: Load image data and behavioral variables
+% ---------------------------------
 
 dinf = what('Wager_et_al_2008_Neuron_EmotionReg');
 
@@ -23,17 +27,16 @@ imgs = fullfile(dinf.path, 'Wager_2008_emo_reg_vs_look_neg_contrast_images.nii.g
 
 behav_dat = importdata(fullfile(dinf.path,'Wager_2008_emotionreg_behavioral_data.txt'))
 
-%% Step 3: Load and display mask
-% The mask determines which voxels are analyzed.
-% The standard mask is in the CanlabCore Tools repository, so you need the
-% folder containing it (and other CanlabCore folders) on your path.
+%% Step 4: Load and display mask
+% ---------------------------------
 
 mask = which('gray_matter_mask.img')
 canlab_results_fmridisplay(mask, 'compact2');
 
-%% Step 4 : Run mediation
+%% Step 7 : Run mediation
 % Run mediation without bootstrapping (fast)
 % Test that things are working
+% ---------------------------------
 
 x=behav_dat.data(:,1);
 y=behav_dat.data(:,2);
@@ -61,22 +64,27 @@ evalc(str);
 
 % results = mediation_brain(x,y,imgs,'names',names,'mask', mask,'boot','pvals',5, 'bootsamples', 10000);
 
-%% Step 5: Get and save results figures, tables, and report
-% First, change to the mediation analysis directory, if you're not there already.
-% Then, run one of several batch results functions.
+%% Step 8: Get and save results figures, tables, and report
+% ---------------------------------
+%
+% change to the mediation analysis directory, if you're not there already.
 %
 % The most complete way to create and publish a time- and date-stamped HTML
 % report with figures and tables is to run "publish_mediation_report.m" 
+%
 % (This is commented out because this script is published, and we can't
 % have nested publish commands)
-%
+
 % publish_mediation_report;
-%
+
 % ---------------------------------------------------------------------
-% Another option is to use this batch script to create figures and tables, 
-% and save .mat files with results:
+% Get and save results (older format but quite complete):
 
 mediation_brain_results_all_script;
 
-% This function runs a series of calls to mediation_brain_results.m, which
-% is also a stand-alone function. Type "help mediation_brain_results" for more options.
+
+% see mediation_brain_results for more options.
+
+publish_mediation_report
+  Runs batch analyses and publishes HTML report with figures and stats to
+  results/published_output in local study-specific analysis directory.

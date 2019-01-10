@@ -1471,6 +1471,10 @@ end
 % -------------------------------------------------------------------------
 function plot_hists(bootpaths, vnames)
 
+    for i = 1:length(vnames)
+        vnames{i} = strrep(vnames{i}, '_', '');
+    end
+
     tmp = bootpaths(:,3:4);  % c ones
     tmp = tmp(:);
     nbins = max(10, round(length(tmp) ./ 100));

@@ -26,6 +26,12 @@ for i = 1:length(fnames)
     eval([fnames{i} ' = stats.inputOptions.(fnames{i});']);
 end
 
+for i = 1:length(vnames)
+    
+    vnames{i} = strrep(vnames{i}, '_', '');
+    
+end
+
 nadditional = size(additionalM, 2);
 
 if N > 1

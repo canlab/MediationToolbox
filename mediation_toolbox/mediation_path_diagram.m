@@ -11,17 +11,21 @@ function mediation_path_diagram(stats)
 
     %% plot markers
 
+    Xname = strrep(stats.inputOptions.vnames{1}, '_', '');
+    Mname = strrep(stats.inputOptions.vnames{3}, '_', '');
+    Yname = strrep(stats.inputOptions.vnames{2}, '_', '');
+    
     % X
     Xloc = [0 0];
-    Xpts = plot_region_circ(stats.inputOptions.vnames{1}, Xloc);
+    Xpts = plot_region_circ(Xname, Xloc);
 
     % M
     Mloc = [1.5 1];
-    Mpts = plot_region_circ(stats.inputOptions.vnames{3}, Mloc);
+    Mpts = plot_region_circ(Mname, Mloc);
 
     % Y
     Yloc = [3 0];
-    Ypts = plot_region_circ(stats.inputOptions.vnames{2}, Yloc);
+    Ypts = plot_region_circ(Yname, Yloc);
 
 
     %% path arrows
@@ -122,7 +126,8 @@ function cleanup_axis()
 end
 
 function pts = plot_region_circ(name, loc)
-    pts = circleToPolygon([loc(1) loc(2) .5], 200);
+    %pts = circleToPolygon([loc(1) loc(2) .5], 200);
+    pts = circleAsPolygon([loc(1) loc(2) .5], 200);
     fillPolygon(pts, [.8 .8 .8])
     h = drawPolygon(pts, 'k');
     set(h, 'LineWidth', 2, 'Color', [.7 .7 .7]);

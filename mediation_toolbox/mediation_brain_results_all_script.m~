@@ -136,8 +136,6 @@ if strcmp(pthresh, 'fdr')
     warning on
     drawnow; snapnow;
 
-    printhdr('MEDIATION: A, B, A*B CONJUNCTION')
-
     fprintf('%s\n%s\nMEDIATION: A, B, A*B CONJUNCTION \n%s\n%s\n\n', zstr, zstr, zstr, zstr);
     
     [clpos, clneg, clpos_data, clneg_data, clpp2, clnn2] = mediation_brain_results ...
@@ -184,8 +182,6 @@ if strcmp(pthresh, 'fdr')
     
     if exist(fullfile(pwd, 'ap_L2mod.img'), 'file')
         
-        printhdr('Second-level moderators')
-
         fprintf('%s\n%s\nMEDIATION 2ND LEVEL MODERATOR: PATH A\n%s\n%s\n\n', zstr, zstr, zstr, zstr);
         
         [clpos, clneg, clpos_data, clneg_data, clpp2, clnn2] = mediation_brain_results ...
@@ -221,18 +217,14 @@ if strcmp(pthresh, 'fdr')
         
     end
     
-else % non-FDR option
+else
     
-    printhdr('Overlap between Paths a and b')
-
     fprintf('%s\n%s\nMEDIATION: OVERLAP BETWEEN PATH A AND B MAPS\n%s\n%s\n\n', zstr, zstr, zstr, zstr);
     
     warning off
     mediation_brain_results_a_b_overlap('p', pthresh(1), 'k', kthresh(1), 'overlay', overlay, 'save', 'mask', mask, 'slices');
     warning on
     
-    printhdr('MEDIATION:  A, B, A*B CONJUNCTION')
-
     fprintf('%s\n%s\nMEDIATION:  A, B, A*B CONJUNCTION \n%s\n%s\n\n', zstr, zstr, zstr, zstr);
     
     [clpos, clneg, clpos_data, clneg_data, clpp2, clnn2] = mediation_brain_results ...
@@ -287,8 +279,6 @@ else % non-FDR option
 
     if exist(fullfile(pwd, 'ap_L2mod.img'), 'file')
         
-        printhdr('Second-level moderators')
-
         fprintf('%s\n%s\nMEDIATION 2ND LEVEL MODERATOR: PATH A\n%s\n%s\n\n', zstr, zstr, zstr, zstr);
         
         [clpos, clneg, clpos_data, clneg_data, clpp2, clnn2] = mediation_brain_results ...
