@@ -309,9 +309,13 @@ if ~ischar(image_names), image_names = SETUP.X; end
 if ~ischar(image_names), image_names = SETUP.Y; end
 if ~ischar(image_names), disp('Cannot find image names'); end
 
-image_names = check_valid_imagename(image_names);
+image_names = check_valid_imagename(image_names, 0); % returns empty if missing
 
 if isempty(image_names)
+    disp(' ')
+    disp('Warning!! Cannot find original data images. Extracted data from regions will be missing in saved .mat files');
+    disp(' ')
+    
     data_obj = [];
 else
     data_obj = fmri_data(image_names, [], 'noverbose');
