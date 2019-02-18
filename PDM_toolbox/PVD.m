@@ -52,10 +52,10 @@ function [X, Y, M_tilde, Dt, B, nTrials] = PVD(varargin)
 %
 %   **'normalize'**
 %       the mediator matrix will be z-scored for each subject prior to the 
-%       PVD  computation [default].
+%       PVD  computation.
 %
 %   **'nonormalize'**
-%       the mediator matrix will be used as is for the PVD  computation.
+%       [default] The mediator matrix will be used as is for the PVD  computation.
 %
 %
 % :Outputs:
@@ -120,7 +120,7 @@ function [X, Y, M_tilde, Dt, B, nTrials] = PVD(varargin)
 
 
 %%% defaults %%%
-dozscore  = 1;
+dozscore  = 0;
 B = [];
 
 
@@ -240,8 +240,9 @@ A_tilde = V*CB_inv;
 
 D = A_tilde(:,1:B);
 Dt= D'; % return D-transpose, needed for reconstruction of voxelweights later
+% Dt = pinv(D'); % return pinv(D-transpose), no further transformations needed later
 
-
+ 
 %%
 
 % Compute M_tilde

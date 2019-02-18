@@ -89,7 +89,7 @@ elseif ischar(whPDM) && (strcmpi(whPDM,'jointpdm') || strcmpi(whPDM,'jdpm'))
     WJoint = [Wfull{:}] * paths';
     
     % bootstrap JPDM
-    [p{1},Wboot{1}, Tboot{1}] = BootPDMJoint(x, y, M_tilde, W, WJoint, Dt, Bsamp, nTrials, WMi);
+    [p{1},Wboot{1}, Tboot{1}] = BootPDMJoint(x, y, M_tilde, W, WJoint, Dt, Bsamp, nTrials, WMi, Theta);
     
 end
 

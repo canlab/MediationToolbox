@@ -58,26 +58,31 @@ if nargin<2, alpha= 0.05;  end
 if ~isfield(pdm,'boot'), error('no bootstrap results found in PDM struct'); end
 
 % get PDM data
-p = pdm.boot.p;
-Wf= pdm.Wfull;
-WfSig = cell(size(Wf));
 pTAll = [];
 
-% threshold PDMs with bootstrap results
-for k=1:numel(p)
+if isfield(pdm.boot,'p')
+    p = pdm.boot.p;
+    Wf= pdm.Wfull;
+    WfSig = cell(size(Wf));
+   
     
-    switch lower(sigMethod)
-        case {'unc','uncorrected'}, pT = alpha;
-        case 'fdr', p{k}(p{k}==0) = eps; pT = FDR(p{k},alpha);
-        case {'bonf','bonferroni'}, pT = alpha/numel(p{k});
+    % threshold PDMs with bootstrap results
+    for k=1:numel(p)
+        
+        switch lower(sigMethod)
+            case {'unc','uncorrected'}, pT = alpha;
+            case 'fdr', p{k}(p{k}==0) = eps; pT = FDR(p{k},alpha);
+            case {'bonf','bonferroni'}, pT = alpha/numel(p{k});
+        end
+        
+        if isempty(pT), pT=0; end
+        
+        WfSig{k} = Wf{k} .* single(p{k}<pT);
+        
+        pTAll(end+1) = pT;
     end
-    
-    if isempty(pT), pT=0; end
-    
-    WfSig{k} = Wf{k} .* single(p{k}<pT);
-    
-    pTAll(end+1) = pT;
 end
+
 
 % threshold joint PDM
 if isfield(pdm,'WfullJoint') && isfield(pdm.boot,'pJointPDM')
