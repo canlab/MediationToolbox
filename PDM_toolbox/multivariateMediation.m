@@ -37,7 +37,7 @@ function out = multivariateMediation(varargin)
 %             out.dat.M_tilde
 %             out.dat.Dt
 %             out.dat.B
-%             out.dat.nTrials
+%             out.dat.nImgs
 %       These results are returned by the PVD dimension reduction step
 %       e.g., out = multivariateMediation(X,Y,M,'noPDMestimation');
 %       Here, the data fields X,Y,M_tilde are numeric arrays with Nobs rows
@@ -119,11 +119,13 @@ function out = multivariateMediation(varargin)
 % 4/5/2018 - Stephan Geuter
 % added significance thresholding
 %
-
+% 5/4/2018 - Stephan Geuter
+% added SVD dimension reduction
+%
 
 %% determine input mode
 %%% standard input mode - X,Y,and M as cell arrays %%%
-if all([iscell(varargin{1}) iscell(varargin{2}) iscell(varargin{3})])
+if nargin>=3 && all([iscell(varargin{1}) iscell(varargin{2}) iscell(varargin{3})])
 
     % get raw mediation data
     X = varargin{1};
@@ -137,8 +139,11 @@ if all([iscell(varargin{1}) iscell(varargin{2}) iscell(varargin{3})])
 
     % specific defaults
     dimReduction= 1;                        % reduce dimensionality
-    out.dat.B = min(cellfun(@numel,X));     % PVD dimensions
-    
+    if any(strcmpi(varargin,'SVD'))         % empty for SVD, default 90% var explained
+        out.dat.B = [];
+    else
+        out.dat.B = min(cellfun(@numel,X));     % PVD dimensions 
+    end
     
 %%% alternative input mode - output structure with previous results to skip some steps %%%   
 elseif isstruct(varargin{1})
@@ -172,6 +177,8 @@ bootAllPDM  = 1;                  % bootstrap all PDMs
 Bsamp       = 5000;               % number of bootstrap samples
 alpha       = 0.05;               % significance threshold for bootstrapped voxels
 sigMethod   = 'fdr';              % multiple comparison correction method
+doSVD       = 0;                  % use SVD instead of PVD for dimension reduction
+normflag    = 'nonorm';           % z-score mediator data before PVD
 printtable  = 1;                  % print a table with path coefficients
 doplots     = 0;                  % plot coefficients
 save2file   = 0;                  % save results to file
@@ -194,6 +201,14 @@ for j=optInStart:numel(varargin)
                 else
                     warning('No dimension reduction requested, ignoring ''B'' input');
                 end
+                
+            case {'svd'} 
+                doSVD = 1; 
+                if isempty(strcmpi('b',varargin))
+                    out.dat.B = [];
+                end    
+            
+            case {'zscore'}, normflag = 'normalize';    
                      
             % PDM estimation    
             case {'nopdmestimation'}, doPDM=0;
@@ -249,8 +264,14 @@ end
 % project M to orthogonal, lower dimensional space
 if dimReduction
     
-    [out.dat.X, out.dat.Y, out.dat.M_tilde, out.dat.Dt] = PVD(X,Y,M, 'B', out.dat.B);
-    out.dat.nTrials = cellfun(@numel,X)';
+    if doSVD
+        [out.dat.X, out.dat.Y, out.dat.M_tilde, out.dat.Dt, out.dat.nImgs, out.dat.method] = mySVD(X,Y,M, out.dat.B);
+        
+    else
+        [out.dat.X, out.dat.Y, out.dat.M_tilde, out.dat.Dt] = PVD(X,Y,M, 'B', out.dat.B,normflag);
+        out.dat.nImgs  = cellfun(@numel,X(:)); out.dat.nImgs = out.dat.nImgs(:);
+        out.dat.method = 'PVD';
+    end
     
     % save intermediate results to file if requested
     if save2file
@@ -263,7 +284,7 @@ end
 % compute PDMs
 if doPDM
     
-    [out.W, out.Theta, out.Wfull, out.WMinit, out.WfullJoint] = runPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.dat.Dt,'nPDM',nPDM,'jointPDM',doJointPDM);
+    [out.W, out.Theta, out.Wfull, out.WMinit, out.WfullJoint] = runPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.dat.Dt, out.dat.method, 'nPDM',nPDM,'jointPDM',doJointPDM);
     
     % save intermediate results to file if requested
     if save2file
@@ -274,24 +295,23 @@ if doPDM
     if printtable
         printPathCoeff(out.Theta);
     end
-    
-    % coeff figure
-    if doplots
-        plotPathCoeff(out.Theta);
-    end
 end
 
+% coeff figure
+if doplots
+    plotPathCoeff(out.Theta);
+end
 
 
 % bootstrap individual PDMs
 if doBootPDM
     
-    nTrials = out.dat.nTrials;
+    nImgs = out.dat.nImgs;
     if all(isfield(out,{'W','Wfull','dat','WMinit'}))
         if returnBootsamples
-            [p, Wboot, Tboot] = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nTrials, out.WMinit, Bsamp, whPDMBoot);
+            [p, Wboot, Tboot] = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nImgs, out.WMinit, Bsamp, whPDMBoot);
         else
-            p = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nTrials, out.WMinit, Bsamp, whPDMBoot);
+            p = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nImgs, out.WMinit, Bsamp, whPDMBoot);
         end
     else
         error('Missing PDM data bootstrapping');
@@ -303,12 +323,12 @@ end
 % bootstrap joint PDM
 if doBootJPDM
     
-   nTrials = out.dat.nTrials;    
+   nImgs = out.dat.nImgs;    
    if all(isfield(out,{'W','Wfull','dat','WMinit','Theta'}))
        if returnBootsamples
-           [pJ, WbootJ, TbootJ] = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nTrials, out.WMinit, Bsamp, 'JointPDM', out.Theta);
+           [pJ, WbootJ, TbootJ] = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nImgs, out.WMinit, Bsamp, 'JointPDM', out.Theta);
        else
-           pJ = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nTrials, out.WMinit, Bsamp, 'JointPDM', out.Theta);
+           pJ = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nImgs, out.WMinit, Bsamp, 'JointPDM', out.Theta);
        end
    else
        error('Missing PDM data for bootstrapping');
@@ -353,14 +373,17 @@ end
 
 
 
+
 %% inline functions
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     function datOK = checkDataStruct(DAT)
         
         datOK = 0;
         
         % check all fieldnames
-        if isfield(DAT,'dat') && all(isfield(DAT.dat,{'X','Y','M_tilde','Dt','B','nTrials'})) && ...
+        if isfield(DAT,'dat') && all(isfield(DAT.dat,{'X','Y','M_tilde','Dt','B','nImgs'})) && ...
             isnumeric(DAT.dat.X) && isnumeric(DAT.dat.Y) && isnumeric(DAT.dat.M_tilde) ...
             && isnumeric(DAT.dat.Dt)
             
@@ -388,6 +411,41 @@ end
     end
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    function [X, Y, M_tilde, Dt, nTrials, mymeth] = mySVD(treatment,outcome,mediator, nComps)
+       
+        fprintf('SVD for %d subjects...\n',numel(treatment));
+        mymeth = 'SVD';
+        
+        X = []; Y = []; Mtmp = [];
+        for i=1:numel(treatment)
+            X    = [X; treatment{i}]; % observations x 1
+            Y    = [Y; outcome{i}];   % observations x 1
+            Mtmp = [Mtmp, double(mediator{i})]; % voxels x observations
+            nTrials(i,1) = size(treatment{i},1);
+        end
+        
+        [U,S,V] = svd(Mtmp,'econ');
+        
+        % default - explain 90% of the variance
+        if isempty(nComps)
+            nComps = find(cumsum(diag(S))/sum(diag(S))>=0.9,1,'first');
+        elseif nComps>0 && nComps<1  
+            nComps = find(cumsum(diag(S))/sum(diag(S))>=nComps,1,'first');
+        end
+        fprintf('keeping %d components.\n',nComps);
+        
+        M_tilde = V(:,1:nComps) * S(1:nComps,1:nComps);
+        
+        % compute back-projection matrix to fit runPDM.m:
+        % Wfull{j} = V_star*w_k;
+        Dt = U(:,1:nComps);
+        
+    end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     function printPathCoeff(theta)
         theta = [theta{:}];
@@ -399,6 +457,8 @@ end
         fprintf('%s\n',dashes);
     end
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     function plotPathCoeff(theta)
         theta = [theta{:}];
@@ -421,4 +481,6 @@ end
         drawnow;
     end
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end

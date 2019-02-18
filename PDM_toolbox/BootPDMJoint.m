@@ -1,51 +1,30 @@
-function [pv,Wboot, Tboot] = BootPDMJoint(x, y, M_tilde, W, WJoint, Dt, Bsamp, ntrials, WMi)
-% Perform bootstrap on the joint Principal Direction of Mediation (joint PDM)
+function [pv,Wboot, Tboot] = BootPDMJoint(x, y, M_tilde, W, worig, Dt, Bsamp, ntrials,WMi,torig)
+% Perform bootstrap on Degrees of Mediation (DMs)
 %
 %
 % INPUT:
 %
-% x         - treatment (N X 1 vector)
-% y         - outcome (N X 1 vector)
-% Mtilde    - mediator after PVD (N X B matrix)
-% W         - weights from all PDMs (4 x B)
-% WJoint    - voxel weights from Joint PDM (voxels x 1)
-% Dt        - transposed inverse weight projection matrix (B x voxels)
-% Bsamp     - number of bootstrap samples
-% ntrials   - number of trials per subject
-% WMi       - initial values from original PDM estimation
+% x      - treatment (N X 1 vector)
+% y      - outcome (N X 1 vector)
+% Mtilde - mediator after PVD (N X B matrix)
+% Dt     - inverse weight projection matrix (B x voxels)
+% W      - weights from previous directions
+% worig  - weights from current direction
+% Theta  - parametersfrom previous directions
+% Bsamp  - number of bootstrap samples
+% ntrials - number of trials per subject
+% WMi     - initial values from original DM estimation
+% torig   - original Theta parameters from individual PDMs
 %
 % OUTPUT:
 %
 % Wboot  - Bootstrapped weights (Voxels X Bsamp X numdir)
 %
 
-
-% ..
-%     Author and copyright information:
-%
-%     Copyright (C) 2018 Martin Lindquist & Stephan Geuter
-%
-%     This program is free software: you can redistribute it and/or modify
-%     it under the terms of the GNU General Public License as published by
-%     the Free Software Foundation, either version 3 of the License, or
-%     (at your option) any later version.
-%
-%     This program is distributed in the hope that it will be useful,
-%     but WITHOUT ANY WARRANTY; without even the implied warranty of
-%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-%     GNU General Public License for more details.
-%
-%     You should have received a copy of the GNU General Public License
-%     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-% ..
-
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Bsamp = 200;
 % numdir = 1;
-
-p   = size(Dt,2);
+p = size(Dt,2);
 len = length(y);
 Wboot = zeros(p,Bsamp);
 Tboot = zeros(4,Bsamp,numel(W));
@@ -53,8 +32,6 @@ nsub = length(ntrials);
 
 stop = cumsum(ntrials);
 start = [0; stop(1:(end-1))] + 1;
-
-
 
 pinvDt = pinv(Dt);
 clear Dt;
@@ -99,8 +76,6 @@ for i=1:Bsamp,
     Tboot(:,i,:) = theta_n;
 end
 
-fprintf('\n');
-
 % Compute pseudo-null
 
 % Sort voxels by median
@@ -120,19 +95,25 @@ nsamp = 2000;  % "Sample size" for estimating null
 v0 = sort(reshape(QQ(ind2(1:nsamp),:),nsamp*Bsamp,1));
 clear QQ ind ind2;
 
+% compute original joint PDM from individual PDMs
+if iscell(torig)
+    torig = [torig{:}];
+end
+worig = worig.*repmat(sign(torig(3,:)),p,1);
+borig = torig(4,:).*sign(torig(3,:));
+aorig = torig(3,:).*sign(torig(3,:));
+worig = (worig*(aorig.*borig)');
 
 if verLessThan('matlab','9.0')
     para = fitdist([v0; -v0],'Normal');
     pd = makedist('Normal','mu',0,'sigma',para.sigma);
-    pv = (1-cdf(pd,abs(WJoint))) * 2;
+    pv = (1-cdf(pd,abs(worig))) * 2;
 else
     para = fitdist(v0,'HalfNormal');
     pd = makedist('HalfNormal','mu',0,'sigma',para.sigma);
-    pv = 1-cdf(pd,abs(WJoint));
+    pv = 1-cdf(pd,abs(worig));
 end
 
-
-end
 
 % phat0 = gamfit(v0);
 % pv = 1 - gamcdf(worig,phat0(1), phat0(2));

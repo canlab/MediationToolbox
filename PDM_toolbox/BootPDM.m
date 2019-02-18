@@ -55,7 +55,7 @@ Wboot = zeros(p,Bsamp);
 Tboot = zeros(4,Bsamp);
 nsub = length(ntrials);
 
-stop = cumsum(ntrials);
+stop = cumsum(ntrials); stop = stop(:);
 start = [0; stop(1:(end-1))] + 1;
 
 pinvDt = pinv(Dt);
