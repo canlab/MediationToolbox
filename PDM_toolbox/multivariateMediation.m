@@ -1,7 +1,7 @@
 function out = multivariateMediation(varargin)
 
 % Multivariate mediation analysis (Principial Directions of Mediation [PDM]
-% Chén et al. (2017) Biostatistics; Geuter et al.(under review)).
+% ChÃ©n et al. (2017) Biostatistics; Geuter et al.(under review)).
 %
 % :Usage:
 % ::
@@ -440,7 +440,8 @@ end
         
         % compute back-projection matrix to fit runPDM.m:
         % Wfull{j} = V_star*w_k;
-        Dt = U(:,1:nComps);
+        % Dt = U(:,1:nComps);
+        Dt = U(:,1:nComps)';
         
     end
 
