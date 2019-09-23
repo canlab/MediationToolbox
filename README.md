@@ -8,9 +8,9 @@ There is also a help document PDF in MediationToolbox folder
 =======
 For single- and multi-level mediation search tools.
 
-Docmentation available [here](http://canlabweb.colorado.edu/wiki/doku.php/help/fmri_tools_documentation).
+Docmentation available [here](https://canlabweb.colorado.edu/wiki/doku.php/master_table_of_contents/internal/procedures_how-to_documentation/general_procedures/computing/help/mediation/m3_mediation_fmri_toolbox?s[]=mediation).
 
-A walkthrough-example is available [here](https://github.com/canlab/MediationToolbox/tree/master/Mediation_walkthrough)
+Walkthrough examples are available [here](https://github.com/canlab/MediationToolbox/tree/master/Mediation_walkthrough) and [here](https://canlab.github.io/walkthroughs/)
 
 For the high-dimensional mediation analysis, see [here](https://github.com/canlab/MediationToolbox/tree/master/PDM_toolbox)
 
