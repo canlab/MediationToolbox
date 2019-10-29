@@ -372,10 +372,13 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
                         fprintf('[%3.2f, %3.2f]\t', cis(i,1), cis(i,2));
                     end
                     fprintf('\n\n');
+                    stats.ci = cis';
                 end
 
             else
                 [stats.p, stats.z] = bootbca_pval(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
+                cis = bootbca_ci(0.25, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
+                stats.ci = cis';
                 %[dummy, dummy, stats.z, stats.p] = bootbca_pval_onetail(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
 
             end
@@ -768,8 +771,11 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         stats2.prctilep = stats2.p; % percentile method, biased
         if size(X_2ndlevel,2) == 1
             [stats2.p, stats2.z] = bootbca_pval(0, wmean, means, wmean(paths(whgood,:), w(whgood,:)), paths(whgood,:), w(whgood,:));
+            if doCIs, ci2 = bootbca_ci(0.025, wmean, means, wmean(paths(whgood,:), w(whgood,:)), paths(whgood,:), w(whgood,:)); end
+            
         elseif size(X_2ndlevel,2) > 1 % p and z for 2nd level moderator - added by Wani - 06/28/13
             [stats2.p, stats2.z] = bootbca_pval(0, wgls_L2M, means, stats2.beta, paths(whgood,:), w(whgood,:), X_2ndlevel(whgood,:));
+            if doCIs, ci2 = bootbca_ci(0.025, wgls_L2M, means, stats2.beta, paths(whgood,:), w(whgood,:), X_2ndlevel(whgood,:)); end
         end
         %[dummy, dummy, stats2.z, stats2.p] = bootbca_pval_onetail(0, wmean, means, wmean(paths(whgood,:), w(whgood,:)), paths(whgood,:), w(whgood,:));
 
@@ -785,6 +791,10 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
             stats2.std = reshape(stats2.std, size(X_2ndlevel,2), size(stats2.mean,2));
             stats2.prctilep = reshape(stats2.prctilep, size(X_2ndlevel,2), size(stats2.mean,2));
             stats2.t = stats2.beta ./ stats2.ste;
+            if doCIs
+                stats2.ci(:,:,1) = reshape(ci2(:,1), size(X_2ndlevel,2), size(stats2.mean,2));
+                stats2.ci(:,:,2) = reshape(ci2(:,2), size(X_2ndlevel,2), size(stats2.mean,2));
+            end
         end
 
         if verbose, fprintf(' Done in %3.0f s \n', etime(clock, t12)); end

@@ -59,6 +59,7 @@ mediation_covariates = [];
 doplots = 0;
 X_2ndlevel = ones(N, 1);
 logistic_Y = 0;
+doCIs = 0;
 
 for i = 1:length(varargin)
     if ischar(varargin{i})
@@ -69,6 +70,7 @@ for i = 1:length(varargin)
             case 'names', vnames = varargin{i+1};
             case {'plot', 'plots'}, doplots = 1;
             case {'logit', 'logistic', 'logistic_Y'}, logistic_Y = 1;
+            case {'doCIs'}, doCIs = 1;
         end
     end
 end
@@ -535,11 +537,17 @@ if verbose, fprintf('Total time: %3.0f s\n', etime(clock, totalt));  end
         % [p, z] = bootbca_pval(testvalue, bootfun, bstat, stat, [x], [other inputs to bootfun])
         stats2.prctilep = stats2.p; % percentile method, biased
         [stats2.p, stats2.z] = bootbca_pval(0, wmean, means, wmean(paths(whgood,:), w(whgood,:)), paths(whgood,:), w(whgood,:));
+        if doCIs, ci2 = bootbca_ci(0.25, wmean, means, wmean(paths(whgood,:), w(whgood,:)), paths(whgood,:), w(whgood,:)); end
         
         %[dummy, dummy, stats2.z, stats2.p] = bootbca_pval_onetail(0, wmean, means, wmean(paths(whgood,:), w(whgood,:)), paths(whgood,:), w(whgood,:));
         
         stats2.biascorrect = 'BCa bias corrected';
         stats2.alphaaccept = alphaaccept;
+        
+        if doCIs
+            stats2.ci(:,:,1) = reshape(ci2(:,1), 1, 6);
+            stats2.ci(:,:,2) = reshape(ci2(:,2), 1, 6);
+        end
         
         if verbose, fprintf(' Done in %3.0f s \n', etime(clock, t12)); end
     end
