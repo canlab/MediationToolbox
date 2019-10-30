@@ -1,33 +1,21 @@
-% function [paths, toplevelstats, 1stlevelstats] = mediation(X, Y, M, [stats], [plots], [other optional args])
+% [paths, toplevelstats, 1stlevelstats] = mediation(X, Y, M, [stats], [plots], [other optional args])
 %
-% Tor Wager, March 2006
+% Single or multi-level (2-level) mediation analysis using linear models
+% - Flexible model specification: covariates, multiple mediators
+% - Add second-level predictors for moderated mediation
+% - Flexible modeling options: autoregressive (AR) for time series, basis functions to link different data types with different transfer functions
+% - Weighted (Empirical Bayes, one iteration of reweighting) or OLS stats
+% - Inference options: Bootstrapping, parametric, permutation tests
+% - Option to generate results tables and plots (e.g., path diagram)
+% - Flexible input formats:
+%   X, Y, M can be
+%   1) vectors of observations
+%   2) matrices of N columns (observations x N subjects)
+%   3) cell arrays of length N (each cell is vector of obs. for one subject)
 %
-% output:
-% -------------------------------------------------------------------------
-% p values are bias-corrected -- see bootbca_pval.m -- so will not match
-% perfectly to the shading in the histograms that are generated.
+% Created by Tor Wager, March 2006
 %
-%
-% X, Y, M can be
-% 1) vectors of observations
-% 2) matrices of N columns (observations x N subjects)
-% 3) cell arrays of length N (each cell is vector of obs. for one
-% subject)
-%
-%
-% columns of paths:
-% -------------------------------------------------------------------------
-% 1 a   X -> M relationship
-% 2 b   M -> Y relationship
-% 3 cp  unmediated X -> Y relationship (residual)
-% 4 c   X -> Y relationship
-% 5 ab  mediated X -> Y by M (a * b)
-%
-% 6 a2  X -> M2, if additional M's are entered
-% 7 b2  M2 -> Y, if additional M's are entered
-% 8 ab2 a2 * b2
-%
-% Optional arguments:
+% Optional input arguments:
 % -------------------------------------------------------------------------
 % Data input
 % 'M'               Followed by additional mediator(s), in same input
@@ -91,6 +79,24 @@
 %                   ref) Iacobucci (2012) J of Consumer Psych. 22, 592-594
 %                   (added by Wani Woo, 110912)
 %
+%
+% Outputs and interpretation:
+% -------------------------------------------------------------------------
+% p values are bias-corrected -- see bootbca_pval.m -- so will not match
+% perfectly to the shading in the histograms that are generated.
+%
+%
+% columns of paths:
+% -------------------------------------------------------------------------
+% 1 a   X -> M relationship
+% 2 b   M -> Y relationship
+% 3 cp  unmediated X -> Y relationship (residual)
+% 4 c   X -> Y relationship
+% 5 ab  mediated X -> Y by M (a * b)
+%
+% 6 a2  X -> M2, if additional M's are entered
+% 7 b2  M2 -> Y, if additional M's are entered
+% 8 ab2 a2 * b2
 %
 % Examples:
 % -------------------------------------------------------------------------
@@ -255,6 +261,7 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         
         % --------------------------------------------
         % Remove NaNs and Check for bad data
+        % Abort mediation and skip to next dataset if bad/missing
         % --------------------------------------------
         % Remove NaNs from all vars, casewise
         [nanvec, x, y, m, mediation_covariates] = nanremove(x, y, m, mediation_covariates);
@@ -284,20 +291,21 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
             stats = add_info_to_stats(stats);
             stats.analysisname = 'Empty mediation';
     
-            if N > 1
+            if N > 1  % Multi-level: NaN placeholder data
                 [stats.beta, stats.p, stats.Z] = deal( NaN .* zeros(size(X_2ndlevel, 2), size(stats.mean, 2)) );
                 
                 if i == 1, wistats = stats; wistats.mediation_covariates = mediation_covariates;  end
                 wistats = collect_within_stats(wistats, stats, x, y, m, i);
-            else
+                
+            else % Single-level:  NaN placeholder data
                 [stats.beta, stats.p, stats.Z] = deal( NaN .* zeros(1, size(stats.mean, 2)) );
                 
             end
 
-            continue
+            continue    % ...to the next iteration if we have bad/missing data.
         end
 
-
+        % ... if we don't skip, continue below to the main calculation: 
         % --------------------------------------------
         % Compute path coefficients (and standard errors in some cases)
         % If bootstrapping is 'on', skips standard errors
@@ -332,7 +340,14 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         % --------------------------------------------
 
         boot_this_pass = (boottop && N == 1) || (dobootfirstlevel && N > 1);
+        
         if boot_this_pass
+            % Boostrap-based P-values and stats
+            % If this is a multi-level analysis, bootstrapping will *not*
+            % be done here by default because it's not performed until later, on
+            % summary stats across individuals. Unless you enter the
+            % boot_1st_level option.
+            
             if verbose, fprintf('\nBootstrapping: '), t1 = clock; end
 
             % set up boot samples; make sure all are valid (otherwise
@@ -356,7 +371,10 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
 
             % bias correction for final bootstrap samples
             %[p, z] = bootbca_pval(testvalue, bootfun, bstat, stat, [x], [other inputs to bootfun])
+            
             if isempty(mediation_covariates)
+                % Boostrap without covariates. Get stats and P-values with covs
+                
                 [stats.p, stats.z] = bootbca_pval(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt), x, y, m, intcpt);
 
                 %[dummy, dummy, stats.z, stats.p] = bootbca_pval_onetail(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt), x, y, m, intcpt);
@@ -368,7 +386,7 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
                     %[dummy, dummy, stats.z, stats.p] = bootbca_pval_onetail(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt), x, y, m, intcpt);
 
                     disp('95% CIs are:');
-                    for i=1:length(cis)
+                    for i = 1:length(cis)
                         fprintf('[%3.2f, %3.2f]\t', cis(i,1), cis(i,2));
                     end
                     fprintf('\n\n');
@@ -376,18 +394,23 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
                 end
 
             else
+                % Boostrap with covariates. Get stats and P-values with covs
+                
                 [stats.p, stats.z] = bootbca_pval(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
                 cis = bootbca_ci(0.25, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
                 stats.ci = cis';
                 %[dummy, dummy, stats.z, stats.p] = bootbca_pval_onetail(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
 
-            end
+            end % Covariates case
+            
             stats.biascorrect = 'BCa bias corrected';
 
             if verbose, fprintf('Done in %3.0f (s) \n', etime(clock, t1)); end
             
         else
-            % we still must collect stats for weighting in multi-level model
+            % OLS, not bootstrapping. 
+            % We still must collect stats for weighting in multi-level model
+            
             stats = get_ols_stats(paths(i, :), sterrs(i, :), n(i), num_additionalM);
             
         end % boot_this_pass
@@ -404,6 +427,10 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         % collect within-subject stats; assumes independence of trials
         % --------------------------------------------
         if N > 1
+            
+            % wistats collects within-subject stats, to be passed as output
+            % as a secondary stats structure (2nd varargout)
+            
             if i == 1, wistats = stats; end
             wistats = collect_within_stats(wistats, stats, x, y, m, i);
             wistats.mediation_covariates = mediation_covariates;
@@ -434,7 +461,8 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
             % model
             % disp('Plotting for non-bootstrapped results not implemented yet.')
         end
-    end
+        
+    end % End iteration of N datasets (single or multi-level).
 
 
     % =========================================================================
@@ -449,7 +477,7 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
     % if multi-level
     % --------------------------------------------
     if N > 1
-        collect_within_stats_summary;
+        collect_within_stats_summary;                % Operates in wistats
         varargout{2} = wistats;
     end
 
@@ -494,43 +522,22 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
     % --------------------------------------------------
     if N > 1
         if boottop
+            % Boostrap and update stats2 structure
             means = [];
             second_level_bootstrap();
 
         elseif dosignperm
+            % Sign perm and update stats2 structure
             means = [];
             second_level_permtest();
 
         else
-            % Check for and remove bad/missing 2nd level units
-            % -------------------------------------------------
-            whomit = any(w == 0, 2) | any(paths == 0, 2) | any(isnan(paths), 2) | any(isnan(X_2ndlevel), 2);
-            if verbose && any(whomit), warning('mediation:BadData', 'Some 2nd-level units have missing or bad values.'); end      
-            isOK = ~whomit;
+            means = [];
+            second_level_wls();
             
-            if verbose && all(whomit), warning('mediation:BadData', 'No valid data in 2nd-level analysis.'); end
-            
-            % If all bad, run it with all data, and we'll get NaNs and the
-            % right kind of structure back so we don't crash
-            if all(whomit), isOK = whomit; end
-            % -------------------------------------------------
-            
-            % OLS case (2nd-level regression)
-            [b, s2between_ols, stats2] = scn_stats_helper_functions('gls', paths(isOK, :), w(isOK, :), X_2ndlevel(isOK, :));
-
-            stats2.std = stats2.ste .* sqrt(N);
-            
-            % weight, and do it again with weights
-            get_weights_based_on_varcomponents()
-            
-            [b, s2between_ols, stats2] = scn_stats_helper_functions('gls', paths(isOK, :), w(isOK, :), X_2ndlevel(isOK, :));
-            
-            stats2.name = '2nd level statistics';
-
-            % THis is still wrong
-            stats2.Z = abs(norminv(stats2.p ./ 2)) .* sign(stats2.beta);  %repmat(sign(stats2.beta), 1 + num_additionalM, 1);
         end
 
+        % Add inputOptions and names for documentation:
         stats2 = add_info_to_stats(stats2);
         stats2.analysisname = 'Multi-level model';
 
@@ -633,6 +640,42 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
     %
     %
     %__________________________________________________________________________
+
+    % -------------------------------------------------------------------------
+    % Weighted least squares for 2nd level
+    % -------------------------------------------------------------------------
+    
+    function second_level_wls()
+        
+        % Check for and remove bad/missing 2nd level units
+        % -------------------------------------------------
+        whomit = any(w == 0, 2) | any(paths == 0, 2) | any(isnan(paths), 2) | any(isnan(X_2ndlevel), 2);
+        if verbose && any(whomit), warning('mediation:BadData', 'Some 2nd-level units have missing or bad values.'); end
+        isOK = ~whomit;
+        
+        if verbose && all(whomit), warning('mediation:BadData', 'No valid data in 2nd-level analysis.'); end
+        
+        % If all bad, run it with all data, and we'll get NaNs and the
+        % right kind of structure back so we don't crash
+        if all(whomit), isOK = whomit; end
+        % -------------------------------------------------
+        
+        % OLS case (2nd-level regression)
+        [b, s2between_ols, stats2] = scn_stats_helper_functions('gls', paths(isOK, :), w(isOK, :), X_2ndlevel(isOK, :));
+        
+        stats2.std = stats2.ste .* sqrt(N);
+        
+        % weight, and do it again with weights
+        get_weights_based_on_varcomponents()
+        
+        [b, s2between_ols, stats2] = scn_stats_helper_functions('gls', paths(isOK, :), w(isOK, :), X_2ndlevel(isOK, :));
+        
+        stats2.name = '2nd level statistics';
+        
+        % Check this
+        stats2.Z = abs(norminv(stats2.p ./ 2)) .* sign(stats2.beta);  %repmat(sign(stats2.beta), 1 + num_additionalM, 1);
+        
+    end
 
 
     % -------------------------------------------------------------------------
@@ -1358,6 +1401,14 @@ function wistats = collect_within_stats(wistats, stats, x, y, m, i)
     wistats.mean(i,:) = stats.mean;
     wistats.ste(i,:) = stats.ste;
     wistats.std(i,:) = stats.ste .* sqrt(size(x, 1));
+    
+    try % added 10/28/19 by Tor, skip if this causes problems
+        wistats.t(i,:) = stats.t;
+        wistats.df(i,:) = stats.df;
+        wistats.p(i,:) = stats.p;
+    catch
+        disp('Additions 10/28/19 by Tor Wager to add output to within-ss stats need checking to avoid code conflicts');
+    end
 
     num_mediators = size(m, 2);
     
