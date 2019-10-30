@@ -736,13 +736,12 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         
         if verbose, fprintf('Bootstrapping %3.0f samples...', bootsamples); end
 
-            % set up boot samples; make sure all are valid (otherwise
-            % warnings/problems with categorical predictors + small samples)
-            % and initialize random number generator
-            %  subjindx = (1:size(X_2ndlevel, 1))';  % indices of subjects (2nd level units), to get bootstrap samples, etc.
-            subjindx = (1:size(X_2ndlevel(whgood), 1))';  % indices of subjects (2nd level units), to get bootstrap samples, etc.
-            bootsam = setup_boot_samples(subjindx, bootsamples);
-
+        % set up boot samples; make sure all are valid (otherwise
+        % warnings/problems with categorical predictors + small samples)
+        % and initialize random number generator
+        %  subjindx = (1:size(X_2ndlevel, 1))';  % indices of subjects (2nd level units), to get bootstrap samples, etc.
+        subjindx = (1:size(X_2ndlevel(whgood), 1))';  % indices of subjects (2nd level units), to get bootstrap samples, etc.
+        bootsam = setup_boot_samples(subjindx, bootsamples);
 
         if verbose && any(whnan), fprintf('Warning! %3.0f 2nd-level observations are invalid/have missing data.\n', sum(whnan)); end
 
@@ -800,11 +799,24 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         end
 
         stats2 = getstats(means, num_additionalM, stats2); % last input preserves existing info
-        if domultilev && (size(X_2ndlevel,2) > 1), stats2.beta = stats2.mean; end % save beta by bootstrapping: added by Wani - 06/28/13
-
-        % use original weighted mean, not mean of bootstrap samples
-        stats2.mean = wmean(paths(whgood,:), w(whgood,:));
-        stats2.mean_L2M = wgls_L2M(paths(whgood,:), w(whgood,:), X_2ndlevel(whgood,:));
+        
+        b = wgls_L2M(paths(whgood,:), w(whgood,:), X_2ndlevel(whgood,:));
+        
+        stats2.mean = b(1, :);           % intercept;  mean response
+        stats2.mean_descrip = 'Intercept of each col. of Y; (mean response if predictors are centered)';
+        
+        stats2.beta = b(:)';
+        stats2.beta_descrip = 'betas (regression coefficients), k predictors x nvars';
+    
+%         
+%         if domultilev && (size(X_2ndlevel,2) > 1), stats2.beta = stats2.mean; end % save beta by bootstrapping: added by Wani - 06/28/13
+% 
+%         % use original weighted mean, not mean of bootstrap samples
+%         if size(X_2ndlevel,2) == 1
+%             stats2.mean = wmean(paths(whgood,:), w(whgood,:));
+%         elseif size(X_2ndlevel,2) > 1
+%             stats2.mean = wgls_L2M(paths(whgood,:), w(whgood,:), X_2ndlevel(whgood,:));
+%         end
         
         % std is needed for weighted mean option below.
         stats2.std = stats2.ste .* sqrt( sum(whgood) );
@@ -1003,8 +1015,6 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
                 stats2.ebayes_bstar(:, mycol) = b_star(1, :)';
             end
         end
-        
-        
        
         % make sure we deal with missing data subjects
         if length(wh_include) < N
