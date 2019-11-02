@@ -6,7 +6,7 @@ function mediation_scatterplots(stats, varargin)
 % the analysis performed.
 
 
-myfontsize = 24;
+myfontsize = 14;
 for i = 1:length(varargin)
     if ~isempty(varargin{i}) && ~ischar(varargin{i})
 
@@ -95,7 +95,13 @@ switch (N > 1)
             [r,str,sig,ry,rx,h] = prplot(a, covs2, i, dorobust, {'ko'});
             set(gca,'FontSize', myfontsize);
             xlabel('a effect'); ylabel(sprintf('2nd-level cov %3.0f', i));
-            title('Second-level moderation')
+            
+            try
+                mytitle = format_strings_for_legend(stats.inputOptions.l2mnames{i + 1});
+                title(mytitle, 'FontSize', myfontsize); % intercept omitted, so +1 here
+            catch
+                title('Second-level moderation', 'FontSize', myfontsize)
+            end
 
             % re-plot with weights
             plot_with_weights(h, ry, rx, stats.w, 1)

@@ -160,6 +160,9 @@
 % 11/09/12 : Wani added logistic regression option. 
 %
 % 06/28/12 : Wani added bootstrapping for 2nd level moderator. 
+%
+% 10/29/19 : Wani Woo:  moved the values in stats.mean_L2M to the ?stats.beta?
+%               use the values from stats.beta. stats.mean will have stats.beta(1,:) for bootstrapping as for the GLS case.
 
 function [paths, varargout] = mediation(X, Y, M, varargin)
     % -------------------------------------------------------------------------
@@ -382,14 +385,18 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
                 %confidence intervals.  Added by Yoni 4/22.  I'm not 100%
                 %confident of accuracy, but I think its right.
                 if doCIs
-                    [cis] = bootbca_ci(.025, mediationfun, bootpaths, mediationfun(x, y, m, intcpt),  x, y, m, intcpt);
+                    
+                    cis = bootbca_ci(.025, mediationfun, bootpaths, mediationfun(x, y, m, intcpt),  x, y, m, intcpt);
                     %[dummy, dummy, stats.z, stats.p] = bootbca_pval_onetail(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt), x, y, m, intcpt);
 
-                    disp('95% CIs are:');
-                    for i = 1:length(cis)
-                        fprintf('[%3.2f, %3.2f]\t', cis(i,1), cis(i,2));
+                    if verbose
+                        disp('95% CIs are:');
+                        for i = 1:length(cis)
+                            fprintf('[%3.2f, %3.2f]\t', cis(i,1), cis(i,2));
+                        end
+                        fprintf('\n\n');
                     end
-                    fprintf('\n\n');
+                    
                     stats.ci = cis';
                 end
 
@@ -397,6 +404,7 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
                 % Boostrap with covariates. Get stats and P-values with covs
                 
                 [stats.p, stats.z] = bootbca_pval(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
+                
                 cis = bootbca_ci(0.25, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
                 stats.ci = cis';
                 %[dummy, dummy, stats.z, stats.p] = bootbca_pval_onetail(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
@@ -412,6 +420,12 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
             % We still must collect stats for weighting in multi-level model
             
             stats = get_ols_stats(paths(i, :), sterrs(i, :), n(i), num_additionalM);
+            
+            if doCIs
+                civals = norminv(1-.05/2) * stats.ste;
+                stats.ci = stats.mean - civals;
+                stats.ci(:, :, 2) = stats.mean + civals;
+            end
             
         end % boot_this_pass
 
@@ -566,7 +580,7 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         % Multi-level ----------------------------------
         
         if dorobust
-            disp('No robust slope plots yet.')
+            disp('Sorry, robust regression slope plots not implemented yet.')
         else
             % plots of slopes for each subject
             mediation_plots(stats2, 'slopes', varargin);        
@@ -576,12 +590,12 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         end
 
         try mediation_path_diagram(stats2);
-        catch, disp('Error in mediation_path_diagram');
+        catch, disp('Error in mediation_path_diagram: May be missing required functions on Matlab path');
         end
 
         if dolatent
             try plot_hrf_in_latent_model(wistats);
-            catch, disp('Error in plot_hrf_in_latent_model');
+            catch, disp('Error in plot_hrf_in_latent_model: May be missing required functions on Matlab path');
             end
         end
         
@@ -595,7 +609,7 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         % Single-level ----------------------------------
         
         try mediation_path_diagram(stats);
-        catch, disp('Error in mediation_path_diagram');
+        catch, disp('Error in mediation_path_diagram: May be missing required functions on Matlab path');
         end
 
         mediation_scatterplots(stats);
@@ -675,6 +689,12 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         % Check this
         stats2.Z = abs(norminv(stats2.p ./ 2)) .* sign(stats2.beta);  %repmat(sign(stats2.beta), 1 + num_additionalM, 1);
         
+        if doCIs
+            civals = norminv(1-.05/2) * stats2.ste;
+            stats2.ci = stats2.mean - civals;
+            stats2.ci(:, :, 2) = stats2.mean + civals;
+        end
+            
     end
 
 
@@ -800,6 +820,8 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
 
         stats2 = getstats(means, num_additionalM, stats2); % last input preserves existing info
         
+        % Calculate betas (b) using weighted least squares
+        % wgls_L2M is a function handle (e.g., running GLScalc_for_boot_L2M)
         b = wgls_L2M(paths(whgood,:), w(whgood,:), X_2ndlevel(whgood,:));
         
         stats2.mean = b(1, :);           % intercept;  mean response
@@ -808,7 +830,7 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         stats2.beta = b(:)';
         stats2.beta_descrip = 'betas (regression coefficients), k predictors x nvars';
     
-%         
+%         10/28/2019: Wani changed this to make .mean consistent with .beta for all options (wls, bootstrapping, perm)
 %         if domultilev && (size(X_2ndlevel,2) > 1), stats2.beta = stats2.mean; end % save beta by bootstrapping: added by Wani - 06/28/13
 % 
 %         % use original weighted mean, not mean of bootstrap samples
@@ -825,19 +847,21 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         % [p, z] = bootbca_pval(testvalue, bootfun, bstat, stat, [x], [other inputs to bootfun])
         stats2.prctilep = stats2.p; % percentile method, biased
         if size(X_2ndlevel,2) == 1
+            
             [stats2.p, stats2.z] = bootbca_pval(0, wmean, means, wmean(paths(whgood,:), w(whgood,:)), paths(whgood,:), w(whgood,:));
             if doCIs, ci2 = bootbca_ci(0.025, wmean, means, wmean(paths(whgood,:), w(whgood,:)), paths(whgood,:), w(whgood,:)); end
             
         elseif size(X_2ndlevel,2) > 1 % p and z for 2nd level moderator - added by Wani - 06/28/13
+            
             [stats2.p, stats2.z] = bootbca_pval(0, wgls_L2M, means, stats2.beta, paths(whgood,:), w(whgood,:), X_2ndlevel(whgood,:));
             if doCIs, ci2 = bootbca_ci(0.025, wgls_L2M, means, stats2.beta, paths(whgood,:), w(whgood,:), X_2ndlevel(whgood,:)); end
+        
         end
-        %[dummy, dummy, stats2.z, stats2.p] = bootbca_pval_onetail(0, wmean, means, wmean(paths(whgood,:), w(whgood,:)), paths(whgood,:), w(whgood,:));
 
         stats2.biascorrect = 'BCa bias corrected';
         stats2.alphaaccept = alphaaccept;
         
-        % reshape values in a right order: added by Wani - 06/28/13
+        % reshape values into a matrix: added by Wani - 06/28/13
         if domultilev && size(X_2ndlevel,2) > 1
             stats2.beta = reshape(stats2.beta, size(X_2ndlevel,2), size(stats2.mean,2));
             stats2.p = reshape(stats2.p, size(X_2ndlevel,2), size(stats2.mean,2));
@@ -1921,6 +1945,13 @@ function print_outcome(stats, stats1)
         print_line('t (~N)', stats.mean(1, :) ./stats.ste(1, :))
     end
     print_line('Z', Z(1, :))
+    if isfield(stats, 'ci')
+        print_line('CI lb', stats.ci(1, :, 1))
+        print_line('CI ub', stats.ci(1, :, 2))
+    end
+    if isfield(stats, 'dfe')
+        print_line('dfe', stats.dfe(1, :))
+    end
     print_line('p', stats.p(1, :), 4)
     fprintf('\n')
 
@@ -1948,6 +1979,13 @@ function print_outcome(stats, stats1)
                 print_line('t (~N)', stats.mean(i, :) ./stats.ste(i, :))
             end
             print_line('Z', Z(i, :))
+            if isfield(stats, 'ci')
+                print_line('CI lb', stats.ci(i, :, 1))
+                print_line('CI ub', stats.ci(i, :, 2))
+            end
+            if isfield(stats, 'dfe')
+                print_line('dfe', stats.dfe(1, :))
+            end
             print_line('p', stats.p(i, :), 4)
             fprintf('\n')
 
