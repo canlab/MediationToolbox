@@ -174,7 +174,7 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
 
     [doplots, boottop, dorobust, verbose, vnames, N, wistats, bootsamples, dobootfirstlevel, domultilev, ...
         arorder, targetu, shiftrange, dolatent, whpvals_for_boot, dosave, dosignperm, persistent_perms, additionalM, ...
-        num_additionalM, X_2ndlevel, logistic_Y, doCIs] = ...
+        num_additionalM, X_2ndlevel, logistic_Y, doCIs, l2mnames] = ...
         setup_inputs(Y, varargin);
 
     if verbose, totalt = clock; end
@@ -558,12 +558,18 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         varargout{1} = stats2;
 
         if doplots && (boottop || dosignperm)
+            
             if size(X_2ndlevel,2) == 1
                 plot_hists(means, vnames);
+                
             elseif size(X_2ndlevel,2) > 1
-                means_1st_lev_sorted = means(:,linspace(1,size(means,2)-1,size(means,2)/2)); % sort values
-                plot_hists(means_1st_lev_sorted, vnames);
+                % Tor: 11/2019. this does not work and unsure of why needed; removed.
+                % %means_1st_lev_sorted = means(:,linspace(1,size(means,2)-1,size(means,2)/2)); % sort values
+                % plot_hists(means_1st_lev_sorted, vnames);
+                plot_hists(means(:, 1:5), vnames);
+                
             end
+            
         end
     end
 
@@ -579,37 +585,44 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
     if doplots && N > 1
         % Multi-level ----------------------------------
         
+        try
+            mediation_path_diagram(stats2);
+        catch
+            disp('Error in mediation_path_diagram: May be missing required functions on Matlab path');
+        end
+
         if dorobust
             disp('Sorry, robust regression slope plots not implemented yet.')
         else
             % plots of slopes for each subject
-            mediation_plots(stats2, 'slopes', varargin);        
+            mediation_plots(stats2, 'slopes', varargin); 
+                        
+            % Plot individual effects
+            create_figure('Individual Effects');
+            barplot_columns(paths ./ nanstd(paths), 'Individual Effects', [], 'nofig','notable', 'plotout','names',stats.names, 'noviolin');
+            set(gca, 'XTickLabel', stats.names);
+            ylabel('Standardized beta (slope) values');
+            drawnow
+            
             mediation_scatterplots(stats2);
             mediation_plots(stats2, 'abcov');
             
         end
 
-        try mediation_path_diagram(stats2);
-        catch, disp('Error in mediation_path_diagram: May be missing required functions on Matlab path');
-        end
 
         if dolatent
             try plot_hrf_in_latent_model(wistats);
             catch, disp('Error in plot_hrf_in_latent_model: May be missing required functions on Matlab path');
             end
         end
-        
-        % Plot individual effects
-        create_figure('Individual Effects');
-        barplot_columns(paths, 'Individual Effects', [], 'nofig','notable', 'plotout','names',stats.names);
-        set(gca, 'XTickLabel', stats.names);
-        ylabel('Beta (slope) values');
-        
+
     elseif doplots && N == 1
         % Single-level ----------------------------------
         
-        try mediation_path_diagram(stats);
-        catch, disp('Error in mediation_path_diagram: May be missing required functions on Matlab path');
+        try 
+            mediation_path_diagram(stats);
+        catch
+            disp('Error in mediation_path_diagram: May be missing required functions on Matlab path');
         end
 
         mediation_scatterplots(stats);
@@ -1107,8 +1120,7 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
 
         inputOptions = struct('N', N, 'npaths', npaths, 'initial_bootsamples', bootsamples, 'arorder', arorder, 'targetu', targetu);
 
-        inputOptions.vnames = vnames; % do we need this?
-        %%%%inputOptions.names = stats_struct.names;
+        inputOptions.vnames = vnames; 
 
         % save data
         inputOptions.X = X;
@@ -1118,6 +1130,8 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         inputOptions.mediation_covariates = MCOVS; %mediation_covariates;
         inputOptions.X_2ndlevel = X_2ndlevel;
 
+        inputOptions.l2mnames = l2mnames;
+        
         % save options
         inputOptions.bootfirstlevel = ynstr{dobootfirstlevel + 1};
         inputOptions.robust = ynstr{dorobust + 1};
@@ -1173,7 +1187,7 @@ end
 % -------------------------------------------------------------------------
 function [doplots, boottop, dorobust, verbose, vnames, N, wistats, bootsamples, dobootfirstlevel, domultilev, ...
         arorder, targetu, shiftrange, dolatent, whpvals_for_boot, dosave, dosignperm, persistent_perms, ...
-        additionalM, num_additionalM, X_2ndlevel, logistic_Y, doCIs] = ...
+        additionalM, num_additionalM, X_2ndlevel, logistic_Y, doCIs, l2mnames] = ...
         setup_inputs(Y, varargin)
 
     varargin = varargin{1}; % do this because we passed in all varargin args from parent into varargin cell
@@ -1205,6 +1219,7 @@ function [doplots, boottop, dorobust, verbose, vnames, N, wistats, bootsamples, 
     additionalM = [];           % additional mediators, entered in same format as other inputs
 
     X_2ndlevel = [];
+    l2mnames = {};              % Level-2 moderator names
     logistic_Y = 0;
     
     global mediation_covariates
@@ -1242,6 +1257,8 @@ function [doplots, boottop, dorobust, verbose, vnames, N, wistats, bootsamples, 
                 case {'covs', 'covariates', 'mediation_covariates'}, mediation_covariates = varargin{i+1};
 
                 case {'X2','L2moderators', 'L2M', 'l2m'}, X_2ndlevel = varargin{i+1};
+                case {'l2mnames'}, l2mnames = varargin{i + 1};
+                    
                 case {'logit', 'logistic', 'logistic_Y'}, logistic_Y = 1;
                 case {'doCIs', 'CIs'}, doCIs = 1;
             end
@@ -1286,6 +1303,25 @@ function [doplots, boottop, dorobust, verbose, vnames, N, wistats, bootsamples, 
             error('2nd-level covariates must be a matrix of N subjects by k predictors');
         end
         X_2ndlevel = [ones(N, 1) scale(X_2ndlevel, 1)];
+        
+        nx = size(X_2ndlevel, 2);
+        if isempty(l2mnames)
+            % Create level-2 variables names
+            l2mnames{1} = 'Group mean';
+            for i = 2:nx
+                l2mnames{i} = sprintf('Lev2mod %d', i-1);
+            end
+            
+        elseif length(l2mnames) == nx - 1
+            l2mnames = [{'Group mean'} l2mnames];
+            
+        elseif length(l2mnames) == nx
+            % Do nothing; assume names are entered as intended
+        
+        else 
+            error('l2mnames: Level 2 moderator names must contain one cell for each input level-2 moderator variable');
+        end
+
     end
     
     % Number of additional mediators

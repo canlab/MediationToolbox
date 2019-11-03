@@ -220,7 +220,8 @@ newfig = 1;
 weight_option = 'weighted';
 doind = 1;
 
-baseindlinecolor = [0 0 1];
+baseindlinecolor = [.3 .3 1];
+indlinewidth = .5;              % line width
 
 for i = 1:length(varargin)
     if ischar(varargin{i})
@@ -254,8 +255,10 @@ minwt = .4;     % make sure all lines are visible.
 w = rescale_range(w, [minwt 1]);
 
 % line widths: median split, top half gets 2.
-linew = (w(:,1) >= median(w(:,1))) + 1;
+%linew = (w(:,1) >= median(w(:,1))) + 1;
+% Tor: modify to use constant line width; 11/2019
 
+% Lines become lighter in proportion to weight
 %w = 1 - w;  % for colors, 0 is black
 white = [1 1 1];
 colors = (repmat(w, 1, 3) .* repmat(baseindlinecolor, N, 1)) + repmat((1 - w), 1, 3) .* repmat( white, N, 1 );
@@ -277,7 +280,7 @@ for i = 1:N
     s = std(x) * tinv(.975, length(x)-1);
     x = [mx - s mx + s];
     y = betas(2, i) + betas(1, i) * x;
-    plot(x, y, '-', 'Color', colors(i,:), 'LineWidth', linew(i));
+    plot(x, y, '-', 'Color', colors(i,:), 'LineWidth', indlinewidth); % linew(i));
 
     allx = [allx x];
 end
