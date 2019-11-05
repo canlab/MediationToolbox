@@ -1982,8 +1982,8 @@ function print_outcome(stats, stats1)
     end
     print_line('Z', Z(1, :))
     if isfield(stats, 'ci')
-        print_line('CI lb', stats.ci(1, :, 1))
-        print_line('CI ub', stats.ci(1, :, 2))
+        print_line('CI lb', stats.ci(1, :))
+        print_line('CI ub', stats.ci(2, :))
     end
     if isfield(stats, 'dfe')
         print_line('dfe', stats.dfe(1, :))
