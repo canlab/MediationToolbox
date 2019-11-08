@@ -397,7 +397,8 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
                         fprintf('\n\n');
                     end
                     
-                    stats.ci = cis';
+                    stats.ci(:,:,1) = cis(:,1)';
+                    stats.ci(:,:,2) = cis(:,2)';
                 end
 
             else
@@ -406,7 +407,8 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
                 [stats.p, stats.z] = bootbca_pval(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
                 
                 cis = bootbca_ci(0.25, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
-                stats.ci = cis';
+                stats.ci(:,:,1) = cis(:,1)';
+                stats.ci(:,:,2) = cis(:,2)';;
                 %[dummy, dummy, stats.z, stats.p] = bootbca_pval_onetail(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
 
             end % Covariates case
@@ -886,6 +888,11 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
             if doCIs
                 stats2.ci(:,:,1) = reshape(ci2(:,1), size(X_2ndlevel,2), size(stats2.mean,2));
                 stats2.ci(:,:,2) = reshape(ci2(:,2), size(X_2ndlevel,2), size(stats2.mean,2));
+            end
+        else
+            if doCIs
+                stats2.ci(:,:,1) = ci2(:,1)';
+                stats2.ci(:,:,2) = ci2(:,2)';
             end
         end
 
@@ -1982,8 +1989,8 @@ function print_outcome(stats, stats1)
     end
     print_line('Z', Z(1, :))
     if isfield(stats, 'ci')
-        print_line('CI lb', stats.ci(1, :))
-        print_line('CI ub', stats.ci(2, :))
+        print_line('CI lb', stats.ci(1, :, 1))
+        print_line('CI ub', stats.ci(1, :, 2))
     end
     if isfield(stats, 'dfe')
         print_line('dfe', stats.dfe(1, :))
