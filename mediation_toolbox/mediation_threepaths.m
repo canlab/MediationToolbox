@@ -19,7 +19,7 @@ function [paths, varargout] = mediation_threepaths(X, Y, M1, M2, varargin)
 %
 % Example)
 % for i = 1:30
-%   X{i} = rand(50,1); M1{i} = rand(50,1); M2{i} = rand(50, 1); 
+%   X{i} = rand(50,1); M1{i} = rand(50,1); M2{i} = rand(50, 1);
 %   Y{i} = rand(50,1); cov{i} = rand(50,2);
 % end
 % 
@@ -1366,6 +1366,10 @@ else
     print_line('t (~N)', stats.mean(1, :) ./stats.ste(1, :))
 end
 print_line('Z', Z(1, :))
+if isfield(stats, 'ci')
+    print_line('CI lb', stats.ci(1, :, 1))
+    print_line('CI ub', stats.ci(1, :, 2))
+end
 print_line('p', stats.p(1, :), 4)
 fprintf('\n')
 
@@ -1393,6 +1397,10 @@ if size(stats.p, 1) > 1 && isfield(stats, 'beta')
             print_line('t (~N)', stats.mean(i, :) ./stats.ste(i, :))
         end
         print_line('Z', Z(i, :))
+        if isfield(stats, 'ci')
+            print_line('CI lb', stats.ci(i, :, 1))
+            print_line('CI ub', stats.ci(i, :, 2))
+        end
         print_line('p', stats.p(i, :), 4)
         fprintf('\n')
         
