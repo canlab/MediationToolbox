@@ -1,5 +1,9 @@
 function [pvals, results_table, stats, randseed] = mediation_sim3(n, t, s_g, s_a, s_b, apop, bpop, abcov, l2m_acov, l2m_bcov, color, varargin)
 % Simulated results and significance rates (power or false positives) for multilevel mediation.
+% generates a dataset (in an encapusulated subfunction) and runs multiple iterations, 
+% collecting stats on significance (power or false positive rate, depending on whether there 
+% is a true effect or not for each parameter) across them. Overall summary
+% stats for each effect are in results_table.
 %
 % mediation_sim3(n, t, s_g, s_a, s_b, apop, bpop, abcov, l2m_acov, l2m_bcov, color, [optional inputs])
 %
