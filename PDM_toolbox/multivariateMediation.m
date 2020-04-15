@@ -1,7 +1,7 @@
 function out = multivariateMediation(varargin)
 
 % Multivariate mediation analysis (Principial Directions of Mediation [PDM]
-% ChÃ©n et al. (2017) Biostatistics; Geuter et al.(under review)).
+% Chén et al. (2017) Biostatistics; Geuter et al.(under review)).
 %
 % :Usage:
 % ::
@@ -37,7 +37,7 @@ function out = multivariateMediation(varargin)
 %             out.dat.M_tilde
 %             out.dat.Dt
 %             out.dat.B
-%             out.dat.nImgs
+%             out.dat.nTrials
 %       These results are returned by the PVD dimension reduction step
 %       e.g., out = multivariateMediation(X,Y,M,'noPDMestimation');
 %       Here, the data fields X,Y,M_tilde are numeric arrays with Nobs rows
@@ -73,12 +73,6 @@ function out = multivariateMediation(varargin)
 %     **Bsamp**
 %         followed by the number of bootstrap samples for each PDM [default=5000]
 %         
-%     **notable**
-%         don't print a table with the path coefficients
-%
-%     **plots**
-%         plot coefficients
-%
 %     **save2file**
 %         followed by a .mat-filename to which the results in the output  
 %         structure will be saved.
@@ -113,19 +107,11 @@ function out = multivariateMediation(varargin)
 % 02/23/2018 - Stephan Geuter
 % created the file
 %
-% 4/3/2018 - Stephan Geuter
-% added table and figure options
-%
-% 4/5/2018 - Stephan Geuter
-% added significance thresholding
-%
-% 5/4/2018 - Stephan Geuter
-% added SVD dimension reduction
 %
 
 %% determine input mode
 %%% standard input mode - X,Y,and M as cell arrays %%%
-if nargin>=3 && all([iscell(varargin{1}) iscell(varargin{2}) iscell(varargin{3})])
+if all([iscell(varargin{1}) iscell(varargin{2}) iscell(varargin{3})])
 
     % get raw mediation data
     X = varargin{1};
@@ -139,10 +125,12 @@ if nargin>=3 && all([iscell(varargin{1}) iscell(varargin{2}) iscell(varargin{3})
 
     % specific defaults
     dimReduction= 1;                        % reduce dimensionality
-    if any(strcmpi(varargin,'SVD'))         % empty for SVD, default 90% var explained
-        out.dat.B = [];
+    
+    dim = min(cellfun(@numel,X));
+    if (dim > 1)
+        out.dat.B = min(cellfun(@numel,X));     % PVD dimensions
     else
-        out.dat.B = min(cellfun(@numel,X));     % PVD dimensions 
+        out.dat.B = 5;                          % Default SVD dimensions
     end
     
 %%% alternative input mode - output structure with previous results to skip some steps %%%   
@@ -175,12 +163,6 @@ doBootPDM   = 0;                  % bootstrap individual PDMs
 doBootJPDM  = 0;                  % bootstrap joint PDM
 bootAllPDM  = 1;                  % bootstrap all PDMs 
 Bsamp       = 5000;               % number of bootstrap samples
-alpha       = 0.05;               % significance threshold for bootstrapped voxels
-sigMethod   = 'fdr';              % multiple comparison correction method
-doSVD       = 0;                  % use SVD instead of PVD for dimension reduction
-normflag    = 'nonorm';           % z-score mediator data before PVD
-printtable  = 1;                  % print a table with path coefficients
-doplots     = 0;                  % plot coefficients
 save2file   = 0;                  % save results to file
 returnBootsamples = 0;            % return Bootstrap samples (large array)
 
@@ -193,8 +175,9 @@ for j=optInStart:numel(varargin)
     
     if ischar(varargin{j})
         switch lower(varargin{j}) % all keyword comparisons in lower case
+                            
+            case {'nopdmestimation'}, doPDM=0;
                 
-            % dimension reduction
             case {'b'}
                 if dimReduction==1
                     out.dat.B  = varargin{j+1}; varargin{j+1} = [];
@@ -202,22 +185,10 @@ for j=optInStart:numel(varargin)
                     warning('No dimension reduction requested, ignoring ''B'' input');
                 end
                 
-            case {'svd'} 
-                doSVD = 1; 
-                if isempty(strcmpi('b',varargin))
-                    out.dat.B = [];
-                end    
-            
-            case {'zscore'}, normflag = 'normalize';    
-                     
-            % PDM estimation    
-            case {'nopdmestimation'}, doPDM=0;
-                
             case {'npdm'}, nPDM = varargin{j+1}; varargin{j+1} = [];
                 
             case {'jpdm','jointpdm'}, doJointPDM = varargin{j+1}; varargin{j+1} = [];
                 
-            % bootstrapping    
             case {'bootpdm'}
                 doBootPDM = 1;
                 if numel(varargin)>j && isnumeric(varargin{j+1})
@@ -225,27 +196,13 @@ for j=optInStart:numel(varargin)
                     bootAllPDM = 0;
                 end
                 
-            case {'bootjpdm','bootjointpdm'}, doBootJPDM = 1;
+            case {'bootjdpm','bootjointpdm'}, doBootJPDM = 1;
                 
             case {'bsamp'}, Bsamp = varargin{j+1}; varargin{j+1} = [];
                 
-            case {'returnbootsamples'}, returnBootsamples = 1;
-    
-            case {'alpha'}, alpha = varargin{j+1}; varargin{j+1} = []; 
-                
-            case {'fdr'}, sigMethod = 'fdr';
-                
-            case {'bonf','bonferroni'}, sigMethod = 'bonf';    
-            
-            case {'unc','uncorrected'}, sigMethod = 'unc';    
-                
-            % output   
-            case {'notable','notables'}, printtable=0;     
-                
-            case {'plot','plots'}, doplots = 1;    
-                
             case {'save2file','savetofile'}, save2file = 1; outFn = varargin{j+1}; varargin{j+1} = [];
                 
+            case {'returnbootsamples'}, returnBootsamples = 1;
                 
             otherwise, warning(['Unknown input string option: ' varargin{j}]);
         end
@@ -264,14 +221,13 @@ end
 % project M to orthogonal, lower dimensional space
 if dimReduction
     
-    if doSVD
-        [out.dat.X, out.dat.Y, out.dat.M_tilde, out.dat.Dt, out.dat.nImgs, out.dat.method] = mySVD(X,Y,M, out.dat.B);
-        
+    if (size(X{1},1)>1)
+        [out.dat.X, out.dat.Y, out.dat.M_tilde, out.dat.Dt] = PVD(X,Y,M, 'B', out.dat.B);
     else
-        [out.dat.X, out.dat.Y, out.dat.M_tilde, out.dat.Dt] = PVD(X,Y,M, 'B', out.dat.B,normflag);
-        out.dat.nImgs  = cellfun(@numel,X(:)); out.dat.nImgs = out.dat.nImgs(:);
-        out.dat.method = 'PVD';
+        [out.dat.X, out.dat.Y, out.dat.M_tilde, out.dat.Dt] = SingleTrial_SVD(X,Y,M, 'B', out.dat.B);
     end
+    
+    out.dat.nTrials = cellfun(@numel,X)';
     
     % save intermediate results to file if requested
     if save2file
@@ -284,34 +240,25 @@ end
 % compute PDMs
 if doPDM
     
-    [out.W, out.Theta, out.Wfull, out.WMinit, out.WfullJoint] = runPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.dat.Dt, out.dat.method, 'nPDM',nPDM,'jointPDM',doJointPDM);
+    [out.W, out.Theta, out.Wfull, out.WMinit, out.WfullJoint] = runPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.dat.Dt,'nPDM',nPDM,'jointPDM',doJointPDM);
     
     % save intermediate results to file if requested
     if save2file
         save(outFn,'out');
     end
-    
-    % output table
-    if printtable
-        printPathCoeff(out.Theta);
-    end
 end
 
-% coeff figure
-if doplots
-    plotPathCoeff(out.Theta);
-end
 
 
 % bootstrap individual PDMs
 if doBootPDM
     
-    nImgs = out.dat.nImgs;
+    nTrials = out.dat.nTrials;
     if all(isfield(out,{'W','Wfull','dat','WMinit'}))
         if returnBootsamples
-            [p, Wboot, Tboot] = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nImgs, out.WMinit, Bsamp, whPDMBoot);
+            [p, Wboot, Tboot] = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nTrials, out.WMinit, Bsamp, whPDMBoot);
         else
-            p = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nImgs, out.WMinit, Bsamp, whPDMBoot);
+            p = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nTrials, out.WMinit, Bsamp, whPDMBoot);
         end
     else
         error('Missing PDM data bootstrapping');
@@ -323,17 +270,18 @@ end
 % bootstrap joint PDM
 if doBootJPDM
     
-   nImgs = out.dat.nImgs;    
+   nTrials = out.dat.nTrials;    
    if all(isfield(out,{'W','Wfull','dat','WMinit','Theta'}))
        if returnBootsamples
-           [pJ, WbootJ, TbootJ] = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nImgs, out.WMinit, Bsamp, 'JointPDM', out.Theta);
+           [pJ, WbootJ, TbootJ] = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nTrials, out.WMinit, Bsamp, 'JointPDM', out.Theta);
        else
-           pJ = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nImgs, out.WMinit, Bsamp, 'JointPDM', out.Theta);
+           pJ = runBootstrapPDM(out.dat.X, out.dat.Y, out.dat.M_tilde, out.W , out.Wfull, out.dat.Dt, nTrials, out.WMinit, Bsamp, 'JointPDM', out.Theta);
        end
    else
        error('Missing PDM data for bootstrapping');
     end
 end
+
 
 
 %% collect outputs
@@ -360,30 +308,20 @@ if doBootJPDM
     end
 end
 
-% threshold bootstrapped PDMs
-if doBootPDM || doBootJPDM
-    out = thresholdPDM(out,alpha,sigMethod);
-end
-
 if save2file
     save(outFn,'out','-v7.3');
 end
 
 
 
-
-
-
 %% inline functions
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     function datOK = checkDataStruct(DAT)
         
         datOK = 0;
         
         % check all fieldnames
-        if isfield(DAT,'dat') && all(isfield(DAT.dat,{'X','Y','M_tilde','Dt','B','nImgs'})) && ...
+        if isfield(DAT,'dat') && all(isfield(DAT.dat,{'X','Y','M_tilde','Dt','B','nTrials'})) && ...
             isnumeric(DAT.dat.X) && isnumeric(DAT.dat.Y) && isnumeric(DAT.dat.M_tilde) ...
             && isnumeric(DAT.dat.Dt)
             
@@ -409,79 +347,4 @@ end
             error('Data dimension mismatch between Dt and M_tilde');
         end
     end
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    function [X, Y, M_tilde, Dt, nTrials, mymeth] = mySVD(treatment,outcome,mediator, nComps)
-       
-        fprintf('SVD for %d subjects...\n',numel(treatment));
-        mymeth = 'SVD';
-        
-        X = []; Y = []; Mtmp = [];
-        for i=1:numel(treatment)
-            X    = [X; treatment{i}]; % observations x 1
-            Y    = [Y; outcome{i}];   % observations x 1
-            Mtmp = [Mtmp, double(mediator{i})]; % voxels x observations
-            nTrials(i,1) = size(treatment{i},1);
-        end
-        
-        [U,S,V] = svd(Mtmp,'econ');
-        
-        % default - explain 90% of the variance
-        if isempty(nComps)
-            nComps = find(cumsum(diag(S))/sum(diag(S))>=0.9,1,'first');
-        elseif nComps>0 && nComps<1  
-            nComps = find(cumsum(diag(S))/sum(diag(S))>=nComps,1,'first');
-        end
-        fprintf('keeping %d components.\n',nComps);
-        
-        M_tilde = V(:,1:nComps) * S(1:nComps,1:nComps);
-        
-        % compute back-projection matrix to fit runPDM.m:
-        % Wfull{j} = V_star*w_k;
-        % Dt = U(:,1:nComps);
-        Dt = U(:,1:nComps)';
-        
-    end
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    function printPathCoeff(theta)
-        theta = [theta{:}];
-        dashes = '_____________________________________________________________________';
-        fprintf('\nPDM path coefficients\n%s\n\tpath a\t\tpath b\t\tpath ab\t\tpath c''\n',dashes);
-        for k=1:size(theta,2)
-            fprintf('PDM%2d\t%5.4f\t\t%5.4f\t\t%5.4f\t\t%5.4f\n',k,theta(3,k),theta(4,k),theta(5,k),theta(2,k));
-        end
-        fprintf('%s\n',dashes);
-    end
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    function plotPathCoeff(theta)
-        theta = [theta{:}];
-        col = lines(4);
-        create_figure('PDM paths',1,3); clf;
-        subplot(1,3,1);
-        plot(theta(3,:),'-o','color',col(1,:),'linewidth',1.5); 
-        title('path a'); xlabel('PDM #'); ylabel('coefficients');
-        
-        subplot(1,3,2);
-        plot(theta(4,:),'-o','color',col(2,:),'linewidth',1.5);
-        title('path b'); xlabel('PDM #');
-        
-        subplot(1,3,3);
-        plot(abs(theta(5,:)),'-o','color',col(3,:),'linewidth',1.5);
-        title('abs(path ab)'); xlabel('PDM #');
-
-        ax=findobj(gcf,'Type','axes');
-        set(ax,'xlim',[0.5 size(theta,2)+0.5],'FontSize',12,'Xtick',1:size(theta,2));
-        drawnow;
-    end
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end

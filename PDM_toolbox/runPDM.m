@@ -1,4 +1,4 @@
-function [W, Theta, Wfull, WMinit, WJoint] = runPDM(x, y, M_tilde, Dt, methodFlag, varargin)
+function [W, Theta, Wfull, WMinit, WJoint] = runPDM(x, y, M_tilde, Dt, varargin)
 
 
 % ..
@@ -28,6 +28,7 @@ function [W, Theta, Wfull, WMinit, WJoint] = runPDM(x, y, M_tilde, Dt, methodFla
 nPDM       = min(5,size(M_tilde,2));
 doJointPDM = 1;
 
+
 %%% parse varargin %%%
 for j=1:numel(varargin)
     
@@ -37,7 +38,7 @@ for j=1:numel(varargin)
             case {'npdm'}, nPDM = varargin{j+1}; varargin{j+1} = [];
                 
             case {'jpdm','jointpdm'}, doJointPDM = varargin{j+1}; varargin{j+1} = [];
-
+                
             otherwise, warning(['Unknown input string option: ' varargin{j}]);
         end
     end
@@ -51,13 +52,7 @@ fprintf(1,'computing %d PDMs...',nPDM);
 
 % init var
 W = []; Theta = []; Wfull = []; F = [];
-% pinvDt = pinv(Dt); %%% check everywhere
-if strcmpi(methodFlag,'PVD')
-    pinvDt = pinv(Dt);
-elseif strcmpi(methodFlag,'SVD')
-    pinvDt =  Dt';
-end
-clear Dt;
+pinvDt = pinv(Dt);
 
 % loop PDMs
 for j=1:nPDM
@@ -65,11 +60,6 @@ for j=1:nPDM
     fprintf(' %d',j);
     [w_k, theta_k, flag, wmi]= PDMN(x,y,M_tilde,W);
        
-    if sign(theta_k(3))==-1
-        theta_k(3:4) = -1 * theta_k(3:4);
-        w_k = -1 * w_k;
-    end
-    
     W{j} = w_k;
     Theta{j} = [theta_k; theta_k(3)*theta_k(4)]; % add a*b to the output
     Wfull{j} = pinvDt*w_k;
