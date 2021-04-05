@@ -64,71 +64,81 @@ drawnow, snapnow
 
 %% FDR-corrected results
 % ----------------------------------------------------------------
+if isempty(SETUP.fdr_p_thresh) || SETUP.fdr_p_thresh <= 0
+        disp('No FDR-significant results');
+else 
+    printhdr('FDR-corrected results');
+    disp('Results corrected across set of a, b, ab images using mediation_brain_corrected_threshold');
+    fprintf('FDR q < .05 = p < %3.8f\n', SETUP.fdr_p_thresh);
 
-printhdr('FDR-corrected results');
-disp('Results corrected across set of a, b, ab images using mediation_brain_corrected_threshold');
-fprintf('FDR q < .05 = p < %3.8f\n', SETUP.fdr_p_thresh);
+    %% Path a results table, FDR-corrected 
 
-%% Path a results table, FDR-corrected 
+    printhdr('Path a, FDR-corrected q < .05')
 
-printhdr('Path a, FDR-corrected q < .05')
+    a_obj = threshold(a_obj, SETUP.fdr_p_thresh, 'unc', 'k', kthresh);
 
-a_obj = threshold(a_obj, SETUP.fdr_p_thresh, 'unc', 'k', kthresh);
+    a_regions_fdr = region(a_obj, data_obj, 'noverbose');                   % Create regions; extract average data in each region into obj.dat
+    a_regions_fdr = table(a_regions_fdr);                                   % Print table
+    fprintf('\n\n');
+    
+    if min(a_obj.p) < SETUP.fdr_p_thresh
+        montage(a_regions_fdr, 'colormap', 'regioncenters');
+        drawnow, snapnow;
+    end
 
-a_regions_fdr = region(a_obj, data_obj, 'noverbose');                   % Create regions; extract average data in each region into obj.dat
-a_regions_fdr = table(a_regions_fdr);                                   % Print table
-fprintf('\n\n');
+    %% Path b results table, FDR-corrected 
 
-montage(a_regions_fdr, 'colormap', 'regioncenters');
-drawnow, snapnow;
+    printhdr('Path b, FDR-corrected q < .05')
 
-%% Path b results table, FDR-corrected 
+    b_obj = threshold(b_obj, SETUP.fdr_p_thresh, 'unc', 'k', kthresh);
 
-printhdr('Path b, FDR-corrected q < .05')
+    b_regions_fdr = region(b_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
+    b_regions_fdr = table(b_regions_fdr);                             % Print table
+    fprintf('\n\n');
+    
+    if min(b_obj.p) < SETUP.fdr_p_thresh
+        montage(b_regions_fdr, 'colormap', 'regioncenters');
+        drawnow, snapnow;
+    end
 
-b_obj = threshold(b_obj, SETUP.fdr_p_thresh, 'unc', 'k', kthresh);
+    %% Path ab results table, FDR-corrected 
 
-b_regions_fdr = region(b_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
-b_regions_fdr = table(b_regions_fdr);                             % Print table
-fprintf('\n\n');
+    printhdr('Path ab, FDR-corrected q < .05')
 
-montage(b_regions_fdr, 'colormap', 'regioncenters');
-drawnow, snapnow;
+    ab_obj = threshold(ab_obj, SETUP.fdr_p_thresh, 'unc', 'k', kthresh);
 
-%% Path ab results table, FDR-corrected 
+    ab_regions_fdr = region(ab_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
+    ab_regions_fdr = table(ab_regions_fdr);                             % Print table
+    fprintf('\n\n');
+    
+    if min(ab_obj.p) < SETUP.fdr_p_thresh
+        montage(ab_regions_fdr, 'colormap', 'regioncenters');
+        drawnow, snapnow;
+    end
 
-printhdr('Path ab, FDR-corrected q < .05')
+    %% Combined montage plot with slices, FDR-corrected
 
-ab_obj = threshold(ab_obj, SETUP.fdr_p_thresh, 'unc', 'k', kthresh);
+    [o2, fig_number] = setup_slice_display([], 3);
 
-ab_regions_fdr = region(ab_obj, data_obj);      % Create regions; extract average data in each region into obj.dat
-ab_regions_fdr = table(ab_regions_fdr);                             % Print table
-fprintf('\n\n');
+    o2 = addblobs(o2, region(a_obj), 'wh_montages', 1:2);
+    o2 = title_montage(o2, 2, 'Path a');
 
-montage(ab_regions_fdr, 'colormap', 'regioncenters');
-drawnow, snapnow;
+    % axes(o2.montage{2}.axis_handles(whmontage))
+    % title('Path a');
 
-%% Combined montage plot with slices, FDR-corrected
+    o2 = addblobs(o2, region(b_obj), 'wh_montages', 3:4);
+    % axes(o2.montage{4}.axis_handles(whmontage))
+    % title('Path b');
+    o2 = title_montage(o2, 4, 'Path b');
 
-[o2, fig_number] = setup_slice_display([], 3);
+    o2 = addblobs(o2, region(ab_obj), 'wh_montages', 5:6);
+    % axes(o2.montage{6}.axis_handles(whmontage))
+    % title('Path ab');
+    o2 = title_montage(o2, 6, 'Path ab');
 
-o2 = addblobs(o2, region(a_obj), 'wh_montages', 1:2);
-o2 = title_montage(o2, 2, 'Path a');
-
-% axes(o2.montage{2}.axis_handles(whmontage))
-% title('Path a');
-
-o2 = addblobs(o2, region(b_obj), 'wh_montages', 3:4);
-% axes(o2.montage{4}.axis_handles(whmontage))
-% title('Path b');
-o2 = title_montage(o2, 4, 'Path b');
-
-o2 = addblobs(o2, region(ab_obj), 'wh_montages', 5:6);
-% axes(o2.montage{6}.axis_handles(whmontage))
-% title('Path ab');
-o2 = title_montage(o2, 6, 'Path ab');
-
-drawnow, snapnow  % flush figure to report
+    drawnow, snapnow  % flush figure to report
+    
+end
 
 %% Uncorrected results
 % ----------------------------------------------------------------
@@ -145,8 +155,10 @@ a_regions_01unc = region(a_obj, data_obj);      % Create regions; extract averag
 a_regions_01unc = table(a_regions_01unc);                             % Print table
 fprintf('\n\n');
 
-montage(a_regions_01unc, 'colormap', 'regioncenters');
-drawnow, snapnow;
+if min(a_obj.p) < pthresh
+    montage(a_regions_01unc, 'colormap', 'regioncenters');
+    drawnow, snapnow;
+end
 
 %% Path b results table, uncorrected 
 
@@ -158,8 +170,10 @@ b_regions_01unc = region(b_obj, data_obj);      % Create regions; extract averag
 b_regions_01unc = table(b_regions_01unc);                             % Print table
 fprintf('\n\n');
 
-montage(b_regions_01unc, 'colormap', 'regioncenters');
-drawnow, snapnow;
+if min(b_obj.p) < pthresh
+    montage(b_regions_01unc, 'colormap', 'regioncenters');
+    drawnow, snapnow;
+end
 
 %% Path ab results table, uncorrected 
 
@@ -171,8 +185,10 @@ ab_regions_01unc = region(ab_obj, data_obj);      % Create regions; extract aver
 ab_regions_01unc = table(ab_regions_01unc);                             % Print table
 fprintf('\n\n');
 
-montage(ab_regions_01unc, 'colormap', 'regioncenters');
-drawnow, snapnow;
+if min(ab_obj.p) < pthresh
+    montage(ab_regions_01unc, 'colormap', 'regioncenters');
+    drawnow, snapnow;
+end
 
 %% Montage plot with slices, uncorrected
 
