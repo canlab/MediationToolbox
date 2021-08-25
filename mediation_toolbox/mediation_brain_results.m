@@ -175,6 +175,49 @@ function [clpos, clneg, clpos_data, clneg_data, clpos_data2, clneg_data2] = medi
 %  Show results on different orthviews axis than main one
 %  Useful for displaying multiple sets of results side by side
 %
+% output variables
+% --------------------------------------------
+% Most output is saved to disk when you run mediation_brain or mediation_brain_multilevel.
+% The "clusters" structure, and it's newer object-oriented version--the region 
+% class object--is a data format that is designed to store information about 
+% contiguous suprathreshold (significant) regions ('blobs'). The cluster or 
+% -class variable is a vector, with one element per brain region.  Within 
+% each element, a struct-format data structure describes the region, including 
+% its voxel locations, mapping from voxel to "world" (mm brain) space, statistics 
+% associated with each voxel and the region average, and potentially data for 
+% voxels or the region average that has been extracted from images and attached.
+% By default (if output variables are requested and it can find valid data 
+% images), mediation_brain_results returns clusters for both positive and 
+% negative effects, with image data extracted for each region and averaged 
+% over in-region voxels. This allows you to examine and plot the data, and 
+% -run a descriptive mediation analysis and mediation plots for any given region.
+%
+% Clusters are defined relative to a threshold, and are produced by mediation_brain_results. When we ran the results above, it generated these cluster structure variables:
+% clpos             Cell array with one cell per threshold entered. Clusters showing positive effects only
+% clneg             A cell array with one cell per threshold entered in the analysis. Negative effects only
+% clpos_data     Cell array with one cell per participant. Each cell has clusters structure with extracted mediation effects. Positive effects only. 
+% clneg_data    Same as above, but negative effects only.
+% clpos_data2   Same as clpos_data, but extracted data in the .timeseries field have been reorganized into a cell array with one cell per subject, suitable for direct input into mediation.m to re-run region-level analyses. 
+% clneg_data2   Same as clpos_data2,  but negative effects only.
+% 
+% Within each cluster, the field .shorttitle contains autolabeled names and 
+% .mm_center contains the coordinates of the region center. For clpos_data 
+% and clneg_data, clpos_data2, clneg_data2 only, .timeseries contains 
+% extracted data averaged across the region, and .all_data contains extracted 
+% data from each voxel for a given participant.  The fields .a_effect_Z, 
+% .a_effect_p, and so on give Z-values and P-values for each effect for each 
+% voxel in the region (for the group, saved in the first subject's cell only). 
+% The clusters with extracted data are also saved to the hard drive, since 
+% the 'save' option was specified. For example, because we entered the 'save' 
+% option above, mediation_brain_results has saved files like this one: 				
+% load('cl_M-Y_pvals_003_k5_noprune.mat')
+% whos cl*
+% M-Y indicates the Path b effect,  003 indicates a P < 0.003 threshold, and 
+% k5 indicates a 5-contiguous-voxel minimum extent threshold. Noprune indicates 
+% that we did not ask for multi-threshold pruning but instead entered a single 
+% threshold (see above). This yields the clpos, clneg, etc. variables 
+% described above.   
+%
 % data extraction
 % --------------------------------------------
 % ...is done automatically IF the following conditions are met:

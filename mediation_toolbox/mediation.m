@@ -163,6 +163,11 @@
 %
 % 10/29/19 : Wani Woo:  moved the values in stats.mean_L2M to the ?stats.beta?
 %               use the values from stats.beta. stats.mean will have stats.beta(1,:) for bootstrapping as for the GLS case.
+%
+% 8/25/21 : Tor Wager & Heejung Jung : Several improvements
+%           fixed bug in # columns for weight matrix w. Does not affect validity of previous results.
+%           better validation of input attributes X, Y, and M
+%           fixed bug when entering 'summarystats' but no bootstrapping. Does not affect validity of previous results.
 
 function [paths, varargout] = mediation(X, Y, M, varargin)
     % -------------------------------------------------------------------------
@@ -171,11 +176,11 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
     global mediation_covariates  % used in mediationfun and mediation_path_coefficients; empty = no covs
 
     varargout = cell(1, nargout - 1);
-
+    
     [doplots, boottop, dorobust, verbose, vnames, N, wistats, bootsamples, dobootfirstlevel, domultilev, ...
         arorder, targetu, shiftrange, dolatent, whpvals_for_boot, dosave, dosignperm, persistent_perms, additionalM, ...
         num_additionalM, X_2ndlevel, logistic_Y, doCIs, l2mnames] = ...
-        setup_inputs(Y, varargin);
+        setup_inputs(X, Y, M, varargin);
 
     if verbose, totalt = clock; end
 
@@ -209,7 +214,8 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
     wgls_L2M = @(paths, w, X_2ndlevel) GLScalc_for_boot_L2M(paths, w, X_2ndlevel); % bootfun for 2nd level moderator: added by Wani 06/28/13
     
     if N > 1
-        w = ones(N) ./ N;  % start with weights equal
+        % Subject weight matrix: # subjects x # paths estimated
+        w = ones(N, npaths) ./ N;  % start with weights equal
     else
         w = ones(size(X, 1)) ./ size(X, 1);
     end
@@ -269,13 +275,19 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         % Remove NaNs from all vars, casewise
         [nanvec, x, y, m, mediation_covariates] = nanremove(x, y, m, mediation_covariates);
 
-        %****NOTE: Check to make sure no exact duplicates in x , y , m
-        % ***check to make sure length valid obs > 1
+        %****NOTE: Check to make sure no exact duplicates in x , y , m;
+        %though duplicates may be possible if vars are experimental design
+        %codes
         
+        % Check for lack of variance in x, y, or m
         tol = .000001;
         isbad = isempty(x) || any(max(abs(m)) < tol) || all(abs(m(:,1) - m(1)) < tol);
         isbad = isbad || any(max(abs(x)) < tol) || all(abs(x(:,1) - x(1)) < tol);
         isbad = isbad || any(max(abs(y)) < tol) || all(abs(y(:,1) - y(1)) < tol);
+
+        % Check that we have enough valid observations in this model, after removing NaNs
+        num_params = sum([size(x, 2) size(m, 2) size(mediation_covariates, 2)]) + 1; % including intercept
+        isbad = isbad || size(x, 1) < num_params + 1; % need at least one error df for precision weighting
         
         % Note: Added 2011 for additional error checking by Tor
         if ~isempty(mediation_covariates)
@@ -287,7 +299,7 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
             % No valid data; skip this subject
             if verbose
                 fprintf('\n')
-                warning('mediation:BadData',['No valid data for subject ' num2str(i) ': Skipping.']); 
+                warning('mediation:BadData',['Not enough valid observations for subject ' num2str(i) ': Skipping.']); 
             end
 
             stats = get_ols_stats(paths(i,:) , sterrs(i,:), n(i), num_additionalM);  % setup dummy stats structure
@@ -408,7 +420,7 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
                 
                 cis = bootbca_ci(0.25, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
                 stats.ci(:,:,1) = cis(:,1)';
-                stats.ci(:,:,2) = cis(:,2)';;
+                stats.ci(:,:,2) = cis(:,2)';
                 %[dummy, dummy, stats.z, stats.p] = bootbca_pval_onetail(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
 
             end % Covariates case
@@ -664,7 +676,7 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
     %
     %
     %
-    % * Inline functions
+    % * Nested functions
     %
     %
     %
@@ -694,10 +706,14 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         
         stats2.std = stats2.ste .* sqrt(N);
         
-        % weight, and do it again with weights
-        get_weights_based_on_varcomponents()
-        
-        [b, s2between_ols, stats2] = scn_stats_helper_functions('gls', paths(isOK, :), w(isOK, :), X_2ndlevel(isOK, :));
+        if domultilev % with multilevel weighting...reweight...otherwise skip for 'summarystats'
+            
+            % weight, and do it again with weights
+            get_weights_based_on_varcomponents()
+            
+            [b, s2between_ols, stats2] = scn_stats_helper_functions('gls', paths(isOK, :), w(isOK, :), X_2ndlevel(isOK, :));
+            
+        end
         
         stats2.name = '2nd level statistics';
         
@@ -953,9 +969,9 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         
         wh_omit = false(1, length(Vxm));
         
-        for i = 1:size(Vxm, 1)
-            if size(cat(2, Vxm{i, :}), 2) < 2 * (num_additionalM + 1) || isempty(Vmy{i}) || isempty(Vxy{i})
-                wh_omit(i) = 1;
+        for ii = 1:size(Vxm, 1)
+            if size(cat(2, Vxm{ii, :}), 2) < 2 * (num_additionalM + 1) || isempty(Vmy{ii}) || isempty(Vxy{ii})
+                wh_omit(ii) = 1;
             end
         end
         
@@ -971,9 +987,9 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         if num_additionalM > 0
 % %             tmpVxm = cat(2, Vxm{:});
 
-            for i = 1:num_additionalM+1
-                my_abetas{i} = tmp_abetas(:, i :(num_additionalM + 1):end);
-% %                 myVxm{i} = tmpVxm(:, i:(num_additionalM + 1):end);
+            for ii = 1:num_additionalM+1
+                my_abetas{ii} = tmp_abetas(:, ii :(num_additionalM + 1):end);
+% %                 myVxm{ii} = tmpVxm(:, ii:(num_additionalM + 1):end);
             end
 
         else
@@ -1028,11 +1044,11 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
             whcols = [whcols 5 + 3*(1:num_additionalM)];
         end
 
-        for mycol = whcols;
+        for mycol = whcols
             % need to figure out ab var...
             % ****NOTE: this is a fix for the case in which some subjects have missing data.
             wh_include = find(~isnan(paths(:, mycol)));
-            for i = 1:length(wh_include), Vab{i} = sterrs(wh_include(i), mycol) .^ 2; end   % get V within subj for each ab path
+            for ii = 1:length(wh_include), Vab{ii} = sterrs(wh_include(ii), mycol) .^ 2; end   % get V within subj for each ab path
             
             [b_star, gam_hat, Vgam_hat, gam_t, sigma2_b_est, subject_w] = RB_empirical_bayes_params(paths(wh_include, 5)', Vab);
             stats2.wls_mean(mycol) = gam_hat(1);  stats2.wls_t(mycol) = gam_t(1); % 1st col is what we want
@@ -1047,10 +1063,10 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         % ------------------------
         if num_additionalM > 0
             % get estimates for additional mediators
-            for i = 1:num_additionalM
+            for ii = 1:num_additionalM
                 % a paths
-                mycol = 5 + (i*3) - 2;
-                [b_star, gam_hat, Vgam_hat, gam_t, sigma2_b_est, subject_w] = RB_empirical_bayes_params(my_abetas{i+1}, Vxm(:, i));
+                mycol = 5 + (ii*3) - 2;
+                [b_star, gam_hat, Vgam_hat, gam_t, sigma2_b_est, subject_w] = RB_empirical_bayes_params(my_abetas{ii+1}, Vxm(:, ii));
                 stats2.wls_mean(mycol) = gam_hat(1);  stats2.wls_t(mycol) = gam_t(1); % 1st col is what we want
                 stats2.w(:, mycol) = subject_w(:, 1);
                 stats2.btwn_std(mycol) = sqrt(sigma2_b_est(1));
@@ -1195,12 +1211,48 @@ end
 function [doplots, boottop, dorobust, verbose, vnames, N, wistats, bootsamples, dobootfirstlevel, domultilev, ...
         arorder, targetu, shiftrange, dolatent, whpvals_for_boot, dosave, dosignperm, persistent_perms, ...
         additionalM, num_additionalM, X_2ndlevel, logistic_Y, doCIs, l2mnames] = ...
-        setup_inputs(Y, varargin)
+        setup_inputs(X, Y, M, varargin)
 
     varargin = varargin{1}; % do this because we passed in all varargin args from parent into varargin cell
-
+    
+    % Validate X, Y, and M
+    % (more checks are done on individual datasets/replicates before mediation)
+    % --------------------------------------------------------------------
+    
+    if length(X) ~= length(M) || length(X) ~= length(Y)
+        error('X, Y, and M must be equal in length');
+    end
+    
+    if iscell(X)
+        % Multilevel
+        if ~iscell(M) || ~iscell(Y)
+            error('Enter each of X, Y, and M as cell arrays, or all as vectors, for multi- or single-level mediation.');
+        end
+        
+        for ii = 1:length(X)
+            % Note: this will allow NaNs, which are removed later before mediation
+            validateattributes(X{ii}, {'numeric'}, {'nonempty'});
+            validateattributes(Y{ii}, {'numeric'}, {'nonempty'});
+            validateattributes(M{ii}, {'numeric'}, {'nonempty'});
+            
+            if length(X{ii}) ~= length(M{ii}) || length(X{ii}) ~= length(Y{ii})
+                fprintf('X, Y, and M are not equal in length for Participant %3.0f\n', ii);
+                error('Check input data.');
+            end
+            
+        end
+        
+    else
+        % Single level
+        validateattributes(X, {'numeric'}, {'nonempty'});
+        validateattributes(Y, {'numeric'}, {'nonempty'});
+        validateattributes(M, {'numeric'}, {'nonempty'});
+        
+    end
+    
+    
     % Defaults
-
+    % --------------------------------------------------------------------
     targetu = .20;              % proportion contribution of boot procedure to p-value
     doplots = 0;                % make plots
     boottop = 0;                  % bootstrap instead of OLS
@@ -1232,9 +1284,12 @@ function [doplots, boottop, dorobust, verbose, vnames, N, wistats, bootsamples, 
     global mediation_covariates
     mediation_covariates = [];
 
-    for i = 1:length(varargin)
-        if ischar(varargin{i})
-            switch varargin{i}
+    % Optional inputs
+    % --------------------------------------------------------------------
+    
+    for ii = 1:length(varargin)
+        if ischar(varargin{ii})
+            switch varargin{ii}
                 case 'plots', doplots = 1;
                 case {'dosave', 'save', 'saveplots'}, dosave = 1;
 
@@ -1243,15 +1298,15 @@ function [doplots, boottop, dorobust, verbose, vnames, N, wistats, bootsamples, 
                 case 'verbose', verbose = 1;
                 case 'noverbose', verbose = 0;
 
-                case {'ar', 'arorder' 'armodel'}, arorder = varargin{i+1};
-                case {'shift', 'shiftrange'}, shiftrange = varargin{i+1};
+                case {'ar', 'arorder' 'armodel'}, arorder = varargin{ii+1};
+                case {'shift', 'shiftrange'}, shiftrange = varargin{ii+1};
                 case {'latent', 'dolatent'}, dolatent = 1;
 
-                case 'names', vnames = varargin{i+1};
-                case 'bootsamples', bootsamples = varargin{i+1};
-                case {'pvals', 'whpvals_for_boot'}, whpvals_for_boot = varargin{i+1};
+                case 'names', vnames = varargin{ii+1};
+                case 'bootsamples', bootsamples = varargin{ii+1};
+                case {'pvals', 'whpvals_for_boot'}, whpvals_for_boot = varargin{ii+1};
 
-                case {'m', 'M'}, additionalM = varargin{i+1};
+                case {'m', 'M'}, additionalM = varargin{ii+1};
 
                     % specific for multi-level model
                 case 'bootstrapfirst', dobootfirstlevel = 1;
@@ -1261,10 +1316,10 @@ function [doplots, boottop, dorobust, verbose, vnames, N, wistats, bootsamples, 
 
                 case {'persistent_perms', 'persistent'}, persistent_perms = 1;
 
-                case {'covs', 'covariates', 'mediation_covariates'}, mediation_covariates = varargin{i+1};
+                case {'covs', 'covariates', 'mediation_covariates'}, mediation_covariates = varargin{ii+1};
 
-                case {'X2','L2moderators', 'L2M', 'l2m'}, X_2ndlevel = varargin{i+1};
-                case {'l2mnames'}, l2mnames = varargin{i + 1};
+                case {'X2','L2moderators', 'L2M', 'l2m'}, X_2ndlevel = varargin{ii+1};
+                case {'l2mnames'}, l2mnames = varargin{ii + 1};
                     
                 case {'logit', 'logistic', 'logistic_Y'}, logistic_Y = 1;
                 case {'doCIs', 'CIs'}, doCIs = 1;
@@ -1293,7 +1348,6 @@ function [doplots, boottop, dorobust, verbose, vnames, N, wistats, bootsamples, 
     
     wistats = [];
 
-
     % if N is 1, then only one level; if N > 1, first level of multi-level
     % analysis.
     if N == 1
@@ -1315,8 +1369,8 @@ function [doplots, boottop, dorobust, verbose, vnames, N, wistats, bootsamples, 
         if isempty(l2mnames)
             % Create level-2 variables names
             l2mnames{1} = 'Group mean';
-            for i = 2:nx
-                l2mnames{i} = sprintf('Lev2mod %d', i-1);
+            for ii = 2:nx
+                l2mnames{ii} = sprintf('Lev2mod %d', ii-1);
             end
             
         elseif length(l2mnames) == nx - 1
@@ -1340,8 +1394,8 @@ function [doplots, boottop, dorobust, verbose, vnames, N, wistats, bootsamples, 
     
     % if additional mediators, make sure we have names
     if ~isempty(additionalM)
-        for i = 1 : 3 + num_additionalM - length(vnames)
-            vnames{3 + i} = ['AddM' num2str(i)];
+        for ii = 1 : 3 + num_additionalM - length(vnames)
+            vnames{3 + ii} = ['AddM' num2str(ii)];
         end
     end
 
@@ -1422,8 +1476,8 @@ function stats = getstats(bp, num_additionalM, varargin)
     
     stats.names = {'a' 'b' 'c''' 'c' 'ab'};
 
-    for i = 1:num_additionalM
-        stats.names = [stats.names {['a_' num2str(i+1)]} {['b_' num2str(i+1)]} {['ab_' num2str(i+1)]}];
+    for ii = 1:num_additionalM
+        stats.names = [stats.names {['a_' num2str(ii+1)]} {['b_' num2str(ii+1)]} {['ab_' num2str(ii+1)]}];
     end
 
     stats.mean = mean(bp);
@@ -1447,9 +1501,9 @@ function stats = get_ols_stats(bp, sterrs, n, num_additionalM)
     stats.t = bp ./ sterrs;
     stats.df = [n-1 n-2-num_additionalM n-2-num_additionalM n-1 n-2-num_additionalM];   % not sure about last one ***check***
 
-    for i = 1:num_additionalM
+    for ii = 1:num_additionalM
         % correct only for non-AR model.
-        stats.names = [stats.names {['a_' num2str(i+1)]} {['b_' num2str(i+1)]} {['ab_' num2str(i+1)]}];
+        stats.names = [stats.names {['a_' num2str(ii+1)]} {['b_' num2str(ii+1)]} {['ab_' num2str(ii+1)]}];
         stats.df = [stats.df n-1 n-2-num_additionalM n-2-num_additionalM];
     
     end
