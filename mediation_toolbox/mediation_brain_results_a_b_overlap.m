@@ -76,14 +76,14 @@ imgs = char('X-M_effect.img', 'X-M_pvals.img', 'M-Y_effect.img', 'M-Y_pvals.img'
 
 mask_obj = fmri_data(mask, 'noverbose');
 
-effect_obj = fmri_data(char('X-M_effect.img', 'M-Y_effect.img'), 'noverbose');
-p_obj = fmri_data(char('X-M_pvals.img', 'M-Y_pvals.img'), 'noverbose');
+effect_obj = fmri_data(char('X-M_effect.img', 'M-Y_effect.img'), mask,'noverbose');
+p_obj = fmri_data(char('X-M_pvals.img', 'M-Y_pvals.img'), mask,'noverbose');
 %p_obj.dat(p_obj.dat == 0) = 1;  % resampling will otherwise make some 0 values look valid
 
 % apply mask
-mask_obj = resample_space(mask_obj, effect_obj);
-effect_obj = apply_mask(effect_obj, mask_obj);
-p_obj = apply_mask(p_obj, mask_obj);
+% mask_obj = resample_space(mask_obj, effect_obj);
+% effect_obj = apply_mask(effect_obj, mask_obj);
+% p_obj = apply_mask(p_obj, mask_obj);
 
 % compute overlap
 bothsig = all(double(p_obj.dat) < p & double(p_obj.dat) > 0, 2); % vox where p-vals are low enough in both images
