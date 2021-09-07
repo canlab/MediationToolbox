@@ -1,31 +1,109 @@
 # MediationToolbox
 
-Getting started: See WIKI at wagerlab.colorado.edu
-There is also a help document PDF in MediationToolbox folder
+The multilevel mediation and moderation (M3) toolbox is a Matlab toolbox designed for mediation analysis. It permits tests of both single-level and multi-level mediation. It was developed in part for use with neuroimaging data, but can be used for any type of data, including behavior/performance, survey data, physiological data, and more.
+
+**Features**
+
+The M3 toolbox provides several features tailored for mediation analysis. These are available when analyzing any kind of data, and are also available when performing voxel-wise analyses of neuroimaging data:
+- Single or multi-level mediation [mediation.m]
+- Bias corrected, accelerated bootstrapping for inference
+- Precision-weighted estimates for mixed effects (multi-level)
+- Logistic regression for categorical outcomes (Y)
+- Ability to add multiple mediators and covariates
+- Second-level moderators for moderated mediation
+- Multi-path (3-path) mediation
+- Permutation testing for inference
+- Latent hemodyamic response basis set and time-shift for fMRI mediators
+- Autocorrelation estimation (AR(p)) for time series mediators
+- Multivariate mediation to identify a pattern across dense, high-dimensional mediators [PDM toolbox](https://github.com/canlab/MediationToolbox/tree/master/PDM_toolbox)
+
+**Main functions to run**
+
+The function mediation.m is the main function to run from the Matlab command line for a standard mediation analysis.  
+
+The toolbox also has special functions for Mediation Effect Parametric Mapping, the practice of running mediation on each voxel in a neuroimaging dataset (single or multilevel) and saving maps of mediation effects:
+mediation_brain                 % for single-level mediation
+mediation_brain_multilevel      % for multilevel mediation
+
+The toolbox also has the ability to perform Multivariate mediation to identify a pattern across dense, high-dimensional mediators. See the bibliography below, and other tutorials in this series, for examples of voxel-wise mediation effect mapping and multivariate mediation.
+
+**Installation and dependencies**
+
+- Clone or download the Mediation toolbox
+- Clone or download the [CANlab Core Tools toolbox](https://github.com/canlab/CanlabCore)
+- Install SPM12 software (needed for neuroimaging mediation analyses only)
+- Requires statistics toolbox
+- Add the toolboxes above "with subfolders" on your Matlab path
+- See [canlab.github.io](https://canlab.github.io) for more detailed help installing CANlab Matlab toolboxes
+
+**Tutorials**
+
+Tutorials are included in the Mediation_walkthrough subfolder in the toolbox.
+Example datasets for mediation brain walkthroughs are in the [CANlab Core toolbox](https://github.com/canlab/CanlabCore)
+
+These include:
+1. mediation_1_basics.mlx : A live script describing the fundamentals of mediation analysis and how to do single-level mediation analyses on simulated data
+2. mediation_example_script_1.m : A script describing how to run single-level Mediation Effect Parametric Mapping with a sample fMRI dataset
+3. mediation_example_script_2.m : Another script on single-level Mediation Effect Parametric Mapping, including alternate output report generation
+4. mediation_brain_multilevel_walkthrough1.mlx : A live script demonstrating multilevel mediation with voxel-wise search using a sample fMRI dataset
+
+Webpages including code and text for these tutorials are on the mediation section of
+[https://canlab.github.io/walkthroughs](https://canlab.github.io/walkthroughs/)
+
+These also include tutorials on CANlab object-oriented analysis and visualization, which can be used to visualize and further analyze mediation toolbox output.
+
+For more tutorials on fMRI, see also:
+[https://canlab.github.io/tutorials](https://canlab.github.io/tutorials/)
+
+
+**Acknowledgements**
+
+This toolbox was developed with the generous support of the U.S. National Science Foundation (NSF 0631637, Multilevel mediation techniques for fMRI) to Tor Wager and Martin Lindquist.  We are grateful to Prof. Niall Bolger and Prof. Michael Sobel for helpful discussions and input.		
+
+**Key References**		
+
+The key papers describing the toolbox are below. It would be helpful to cite these papers when using the M3 toolbox. The manuscripts and supplementary information contain fairly complete descriptions of the model and statistical procedures used.
+
+    Shrout PE, Bolger N (2002) Mediation in experimental and nonexperimental studies: New procedures and recommendations. Psychol Methods 7:422–445.
+ _   A classic reference for bootstrap-based inference in mediation._
+    
+    Kenny DA, Korchmaros JD, Bolger N (2003) Lower level mediation in multilevel models. Psychol Methods 8:115–128.
+_    A seminal paper on multi-level mediation._
+    
+    Wager, T. D., Davidson, M. L., Hughes, B. L., Lindquist, M. A., & Ochsner, K. N. (2008). Prefrontal-subcortical pathways mediating successful emotion regulation. Neuron, 59(6), 1037-1050. doi:10.1016/j.neuron.2008.09.006
+
+_    This paper describes Mediation Effect Parametric Mapping with bootstrap-based inference and examples using multiple mediators. It describes and provides the first application of the canonical case where M is a set of brain images, and X and Y are given. It also describes suppressor effects and search when the initial variable (X) is the brain variable, and M and Y are given._
+    
+    Wager, T. D., Waugh, C. E., Lindquist, M., Noll, D. C., Fredrickson, B. L., & Taylor, S. F. (2009). Brain mediators of cardiovascular responses to social threat, Part I: Reciprocal dorsal and ventral sub-regions of the medial prefrontal cortex and heart-rate reactivity. NeuroImage, 47, 821-835.
+ _    This paper describes multilevel mediation as applied to fMRI time series data, and provides the first application of multilevel mediation to fMRI data._
+     
+    Wager, T. D., van Ast, V. A., Hughes, B. L., Davidson, M. L., Lindquist, M. A., & Ochsner, K. N. (2009). Brain mediators of cardiovascular responses to social threat, Part II: Prefrontal-subcortical pathways and relationship with anxiety. NeuroImage, 47, 836-851.
+
+_This paper describes multi-level mediation on fMRI time series, including the first application of moderated mediation and analyses of time-lagged mediators (mediators for which the time constants in relation to physiological outcomes differ across brain regions)._
+
+    Atlas, L. Y., Bolger, N., Lindquist, M. A., & Wager, T. D. (2010). Brain mediators of predictive cue effects on perceived pain. J Neurosci, 30(39), 12964-12977. doi:10.1523/JNEUROSCI.0057-10.2010
+   
+_This paper applies multi-level mediation to single-trial brain images in fMRI, connecting an experimental design variable (X), brain mediators (M), and a behavioral outcome (Y), including second-level moderators. It provides the first application of multilevel mediation to single-trial fMRI data, and includes an extensive supplementary information document with more details on multilevel mediation._
+   
+    Woo, C. W., Roy, M., Buhle, J. T., & Wager, T. D. (2015). Distinct brain systems mediate the effects of nociceptive input and self-regulation on pain. PLoS biology, 13(1), e1002036. doi:10.1371/journal.pbio.1002036
+
+_ This paper applies multi-level mediation to single-trial fMRI data, and provides the first application of multi-path (3 path) mediation, developed by Choong-Wan Woo._
+        
+    Oliver Y Chén, Ciprian Crainiceanu, Elizabeth L Ogburn, Brian S Caffo, Tor D Wager, Martin A Lindquist, High-dimensional multivariate mediation with application to neuroimaging data, Biostatistics, Volume 19, Issue 2, April 2018, Pages 121–136.
+
+_    This paper describes the statistical foundations of multivariate mediation, and is the primary statistical reference for this technique._
+
+    Stephan Geuter, Elizabeth A Reynolds Losin, Mathieu Roy, Lauren Y Atlas, Liane Schmidt, Anjali Krishnan, Leonie Koban, Tor D Wager, Martin A Lindquist, Multiple Brain Networks Mediating Stimulus–Pain Relationships in Humans, Cerebral Cortex, Volume 30, Issue 7, July 2020, Pages 4204–4219
+    
+_    This paper describes the application of multivariate mediation to a large single-trial fMRI dataset, and illustrates how mediation can be combined with other tools to interpret high-dimensional patterns of brain mediators._
 
 : mediationanalysis.com, mediationanalysis.org
 
 =======
-For single- and multi-level mediation search tools.
 
-Docmentation available [here](https://canlabweb.colorado.edu/wiki/doku.php/master_table_of_contents/internal/procedures_how-to_documentation/general_procedures/computing/help/mediation/m3_mediation_fmri_toolbox?s[]=mediation).
+**Additional References**
 
-Walkthrough examples are available [here](https://github.com/canlab/MediationToolbox/tree/master/Mediation_walkthrough) and [here](https://canlab.github.io/walkthroughs/)
-
-For the high-dimensional mediation analysis, see [here](https://github.com/canlab/MediationToolbox/tree/master/PDM_toolbox)
-
-=======
-
-Citing:
-The key papers describing the toolbox are below.  It would be helpful to cite these papers when using the M3 toolbox.  The manuscripts and supplementary information contain fairly complete descriptions of the model and statistical procedures used.
-
-Wager, T. D., Davidson, M. L., Hughes, B. L., Lindquist, M. A., & Ochsner, K. N. (2008). Prefrontal-subcortical pathways mediating successful emotion regulation. Neuron, 59(6), 1037-1050. doi:10.1016/j.neuron.2008.09.006
-
-Wager, T. D., Waugh, C. E., Lindquist, M., Noll, D. C., Fredrickson, B. L., & Taylor, S. F. (2009). Brain mediators of cardiovascular responses to social threat, Part I: Reciprocal dorsal and ventral sub-regions of the medial prefrontal cortex and heart-rate reactivity. NeuroImage, 47, 821-835. 
-
-=======
-
-Here is a sample of papers using the M3 mediation toolbox. If you know of others we should include, please let us know!
+Here is a sample of additional papers using the M3 mediation toolbox. If you know of others we should include, please let us know!
 
 Kober, H., Barrett, L. F., Joseph, J., Bliss-Moreau, E., Lindquist, K., & Wager, T. D. (2008). Functional grouping and cortical-subcortical interactions in emotion: A meta-analysis of neuroimaging studies. NeuroImage, 42, 998-1031.
  
