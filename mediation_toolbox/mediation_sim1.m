@@ -24,6 +24,10 @@
 % case {'logistic', 'logit'}, logistic = 'logit'; dologit = 1;
 % case 'L2M', L2M = 'yes'; doL2M = 1;
 %
+% NOTE!! 
+% This function saves output in mediation_sim_output.mat, and will continue
+% where left off, including with previously saved parameters. To start a
+% clean run, delete mediation_sim_output.mat!!
 %
 % % Examples:
 % -------------------------------------------------------------------------
@@ -34,12 +38,37 @@
 % N = 15; sigma = linspace(3, 5, N);
 % mediation_sim1(10000, 'N', N, 'sigma', sigma); mediation_sim_output_figs(5);
 %
-% logitstic (Wani)
+% logistic (Wani)
 % mediation_sim1(1000, 'bootsamples', 5000, 'noar', 'logistic'); mediation_sim_output_figs(5);
 % 
 % 2nd level moderation (Wani)
 % mediation_sim1(1000, 'bootsamples', 5000, 'noar', 'L2M', 'sigma', .5, 'N', 50); mediation_sim_output_figs(1, [], 'L2M');
 
+% NOTE: FPR for this sim does not seem to be working correctly -- check and
+% validate. Could be wrong in the N = 1 case.
+% % Example:
+% % ----------------------------------------------------------------------
+% % Run 1000 iterations of single-level mediation with n = 30 data points
+% !rm mediation_sim_output*
+% mediation_sim1(1000, 'noar', 'N', 1, 'n', 30, 'bootsamples', 100);
+%
+% disp('False positive rates for a, b, c'', c, ab:')
+% sum(nullp < 0.05) ./ size(nullp, 1)
+% disp('Power for a, b, c'', c, ab:')
+% sum(altp < 0.05) ./ size(altp, 1)
+% 
+% % Condition on ab and test whether a, b are always significant
+% sig = [altp < 0.05; nullp < 0.05];
+% sig = sig(sig(:, 5), :);
+% disp('a is not sig but ab is: %%')
+% sum(sig(:, 1) == 0) ./ size(sig, 1)
+% disp('b is not sig but ab is: %%')
+% sum(sig(:, 2) == 0) ./ size(sig, 1)
+%
+% % Condition on a and b, and test whether ab is always significant
+% sig = [altp < 0.05; nullp < 0.05];
+% sig = sig(sig(:, 1) & sig(:, 2), :);
+% sum(sig(:, 5)) ./ size(sig, 1)
 
 function mediation_sim1(iter, varargin)
 
@@ -100,6 +129,8 @@ function mediation_sim1(iter, varargin)
 
                 case {'N'}, N = varargin{i+1};
 
+                case {'n'}, n = varargin{i+1};
+                                        
                 case 'sigma', sigma = varargin{i+1};
                 case 'L2M', L2M = 'yes'; doL2M = 1;
 
@@ -417,18 +448,29 @@ function variables = generate_group_data(meth, n, sigma, phi, hrf, N, dologit, d
     if doL2M 
         sigma_L2M = 1;
         
-        if isequal(meth, 'niall_null1'), b_l2m = [0 0 0]; meth_b = [0 0 1]; % 2nd level moderation effects, for [a b cp]
-        elseif isequal(meth, 'niall_alt1'), b_l2m = [0 1 0]; meth_b = [1 1 0]; end
+        if isequal(meth, 'niall_null1')
+            b_l2m = [0 0 0]; 
+            meth_b = [0 0 1]; % 2nd level moderation effects, for [a b cp]
+            
+        elseif isequal(meth, 'niall_alt1')
+            b_l2m = [0 1 0]; 
+            meth_b = [1 1 0]; 
+        end
         
-        M2L = normrnd(0, sigma_L2M, N, 3);
-        B = repmat(b_l2m,N,1).*M2L + repmat(meth_b, N,1);
+        M2L = normrnd(0, sigma_L2M, N, 3);  % level of 2nd-level moderator
+        
+        B = repmat(b_l2m, N, 1) .* M2L + repmat(meth_b, N, 1);
     
     else % ~doL2M
+        
         B = NaN(N,3);
+        
     end
     
     for i = 1:N
+        
         [X(:,i), Y(:,i), M(:,i)] = get_data_single_subject(meth, n, sigma(i), phi, hrf, dologit, doL2M, B(i,:));
+        
     end
 
     variables.X = X;
@@ -520,8 +562,11 @@ function [ox, oy, om] = get_data_single_subject(meth, n, sigma, phi, hrf, dologi
             %    B = [x0 m0 a y0 cp b]
             if ~doL2M
                 mu =     [2 4 0 2.5 1 0];
+                
             elseif doL2M
+                
                 mu =     [2 4 B_L2M(1) 2.5 B_L2M(3) B_L2M(2)];
+                
             end
             
 
@@ -538,7 +583,7 @@ function [ox, oy, om] = get_data_single_subject(meth, n, sigma, phi, hrf, dologi
             % sx, sy, sm are 'true, metabolic' signals in regions x, y, m
             % -----------------------------------------------------------
             %
-
+            %    B = [x0 m0 a y0 cp b]
             % signal var in sx determines effect size
             % (higher = more signal = more power)
             xsignal = normrnd(0, 1, n + hrfartifactadjust, 1);
@@ -548,9 +593,12 @@ function [ox, oy, om] = get_data_single_subject(meth, n, sigma, phi, hrf, dologi
             sm = B(2) + B(3) * sx;
 
             if ~dologit
+                % Continuous
                 sy = B(4) + B(6) * sm + B(5) * sx ;
                 sy = sy + normrnd(0, sigma, n + hrfartifactadjust, 1) ;
+                
             else
+                % Logistic
                 sy = glmval([B(4); B(6); B(5)], [sm sx], 'logit');
                 sy = sy > prctile(sy, 50);
             end
@@ -558,9 +606,6 @@ function [ox, oy, om] = get_data_single_subject(meth, n, sigma, phi, hrf, dologi
             sx = sx + normrnd(0, sigma, n + hrfartifactadjust, 1) ;
             sm = sm + normrnd(0, sigma, n + hrfartifactadjust, 1) ;
             
-
-
-
 
         case 'niall_alt1'
             % ===========================================================
