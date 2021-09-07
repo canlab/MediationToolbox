@@ -29,28 +29,26 @@ The toolbox also has the ability to perform Multivariate mediation to identify a
 
 **Installation and dependencies**
 
-- Clone or download the Mediation toolbox
+- Clone or download the [Mediation toolbox](https://github.com/canlab/MediationToolbox)
 - Clone or download the [CANlab Core Tools toolbox](https://github.com/canlab/CanlabCore)
 - Install SPM12 software (needed for neuroimaging mediation analyses only)
-- Requires statistics toolbox
+- Requires the Matlab statistics toolbox
 - Add the toolboxes above "with subfolders" on your Matlab path
 - See [canlab.github.io](https://canlab.github.io) for more detailed help installing CANlab Matlab toolboxes
 
 **Tutorials**
 
-Tutorials are included in the Mediation_walkthrough subfolder in the toolbox.
-Example datasets for mediation brain walkthroughs are in the [CANlab Core toolbox](https://github.com/canlab/CanlabCore)
+Tutorials are included in the Mediation_walkthrough subfolder in the [Mediation Toolbox](https://github.com/canlab/MediationToolbox), and in the mediation analysis section of [https://canlab.github.io/walkthroughs](https://canlab.github.io/walkthroughs/)
 
-These include:
-1. mediation_1_basics.mlx : A live script describing the fundamentals of mediation analysis and how to do single-level mediation analyses on simulated data
-2. mediation_example_script_1.m : A script describing how to run single-level Mediation Effect Parametric Mapping with a sample fMRI dataset
-3. mediation_example_script_2.m : Another script on single-level Mediation Effect Parametric Mapping, including alternate output report generation
-4. mediation_brain_multilevel_walkthrough1.mlx : A live script demonstrating multilevel mediation with voxel-wise search using a sample fMRI dataset
+Example datasets for mediation brain walkthroughs are included in the [Mediation Toolbox](https://github.com/canlab/MediationToolbox) and [CANlab Core toolbox](https://github.com/canlab/CanlabCore)
 
-Webpages including code and text for these tutorials are on the mediation section of
-[https://canlab.github.io/walkthroughs](https://canlab.github.io/walkthroughs/)
+Tutorials include:
+1. **mediation_1_basics.mlx** : A live script describing the fundamentals of mediation analysis and how to do single-level mediation analyses on simulated data
+2. **mediation_example_script_1.m** : A script describing how to run single-level Mediation Effect Parametric Mapping with a sample fMRI dataset
+3. **mediation_example_script_2.m** : Another version of above, with expanded descriptions 
+4. **mediation_brain_multilevel_walkthrough1.mlx** : A live script demonstrating multilevel mediation with voxel-wise search using a sample fMRI dataset
 
-These also include tutorials on CANlab object-oriented analysis and visualization, which can be used to visualize and further analyze mediation toolbox output.
+The [walkthroughs](https://canlab.github.io/walkthroughs/) also include tutorials on CANlab object-oriented analysis and visualization, which can be used to visualize and further analyze mediation toolbox output.
 
 For more tutorials on fMRI, see also:
 [https://canlab.github.io/tutorials](https://canlab.github.io/tutorials/)
