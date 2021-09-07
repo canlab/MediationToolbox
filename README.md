@@ -27,7 +27,34 @@ mediation_brain_multilevel      % for multilevel mediation
 
 The toolbox also has the ability to perform Multivariate mediation to identify a pattern across dense, high-dimensional mediators. See the bibliography below, and other tutorials in this series, for examples of voxel-wise mediation effect mapping and multivariate mediation.
 
-**Acknowledgements **
+**Installation and dependencies**
+- Clone or download the Mediation toolbox
+- Clone or download the [CANlab Core Tools toolbox](https://github.com/canlab/CanlabCore)
+- Install SPM12 software (needed for neuroimaging mediation analyses only)
+- Requires statistics toolbox
+- Add the toolboxes above "with subfolders" on your Matlab path
+- See [canlab.github.io](https://canlab.github.io) for more detailed help installing CANlab Matlab toolboxes
+
+**Tutorials**
+Tutorials are included in the Mediation_walkthrough subfolder in the toolbox.
+Example datasets for mediation brain walkthroughs are in the [CANlab Core toolbox](https://github.com/canlab/CanlabCore)
+
+These include:
+1. mediation_1_basics.mlx : A live script describing the fundamentals of mediation analysis and how to do single-level mediation analyses on simulated data
+2. mediation_example_script_1.m : A script describing how to run single-level Mediation Effect Parametric Mapping with a sample fMRI dataset
+3. mediation_example_script_2.m : Another script on single-level Mediation Effect Parametric Mapping, including alternate output report generation
+4. mediation_brain_multilevel_walkthrough1.mlx : A live script demonstrating multilevel mediation with voxel-wise search using a sample fMRI dataset
+
+Webpages including code and text for these tutorials are on the mediation section of
+[https://canlab.github.io/walkthroughs](https://canlab.github.io/walkthroughs/)
+
+These also include tutorials on CANlab object-oriented analysis and visualization, which can be used to visualize and further analyze mediation toolbox output.
+
+For more tutorials on fMRI, see also:
+[https://canlab.github.io/tutorials](https://canlab.github.io/tutorials/)
+
+
+**Acknowledgements**
 
 This toolbox was developed with the generous support of the U.S. National Science Foundation (NSF 0631637, Multilevel mediation techniques for fMRI) to Tor Wager and Martin Lindquist.  We are grateful to Prof. Niall Bolger and Prof. Michael Sobel for helpful discussions and input.		
 
@@ -72,11 +99,9 @@ _    This paper describes the application of multivariate mediation to a large s
 
 =======
 
-For the high-dimensional mediation analysis, see 
+**Additional References**
 
-=======
-
-Here is a sample of papers using the M3 mediation toolbox. If you know of others we should include, please let us know!
+Here is a sample of additional papers using the M3 mediation toolbox. If you know of others we should include, please let us know!
 
 Kober, H., Barrett, L. F., Joseph, J., Bliss-Moreau, E., Lindquist, K., & Wager, T. D. (2008). Functional grouping and cortical-subcortical interactions in emotion: A meta-analysis of neuroimaging studies. NeuroImage, 42, 998-1031.
  
