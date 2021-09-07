@@ -28,6 +28,7 @@ mediation_brain_multilevel      % for multilevel mediation
 The toolbox also has the ability to perform Multivariate mediation to identify a pattern across dense, high-dimensional mediators. See the bibliography below, and other tutorials in this series, for examples of voxel-wise mediation effect mapping and multivariate mediation.
 
 **Installation and dependencies**
+
 - Clone or download the Mediation toolbox
 - Clone or download the [CANlab Core Tools toolbox](https://github.com/canlab/CanlabCore)
 - Install SPM12 software (needed for neuroimaging mediation analyses only)
@@ -36,6 +37,7 @@ The toolbox also has the ability to perform Multivariate mediation to identify a
 - See [canlab.github.io](https://canlab.github.io) for more detailed help installing CANlab Matlab toolboxes
 
 **Tutorials**
+
 Tutorials are included in the Mediation_walkthrough subfolder in the toolbox.
 Example datasets for mediation brain walkthroughs are in the [CANlab Core toolbox](https://github.com/canlab/CanlabCore)
 
