@@ -280,7 +280,7 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
         %codes
         
         % Check for lack of variance in x, y, or m
-        tol = .000001;
+        tol = .00001;
         isbad = isempty(x) || any(max(abs(m)) < tol) || all(abs(m(:,1) - m(1)) < tol);
         isbad = isbad || any(max(abs(x)) < tol) || all(abs(x(:,1) - x(1)) < tol);
         isbad = isbad || any(max(abs(y)) < tol) || all(abs(y(:,1) - y(1)) < tol);
