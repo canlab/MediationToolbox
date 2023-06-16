@@ -25,7 +25,8 @@
 %
 % Vectors :
 % ---------
-%   vecnorm              - compute norm of vector or of set of vectors
+%   vecnorm_geom2d_renamed - compute norm of vector or of set
+%                            of vectors; renamed to avoid conflict with Matlab built-in vecnorm.m
 %   normalize            - normalize a vector
 %
 % Lines, edges and rays :
