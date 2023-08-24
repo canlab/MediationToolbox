@@ -418,7 +418,10 @@ function [paths, varargout] = mediation(X, Y, M, varargin)
                 
                 [stats.p, stats.z] = bootbca_pval(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
                 
+                % the built-in matlab bootci function works more reliably, so switching to calling that. The issue seems limited to CI estimation when covariates are present. Yoni Ashar, 8/2023
                 cis = bootbca_ci(0.25, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
+                % cis = bootci(bootsamples, {mediationfun, x, y, m, intcpt, mediation_covariates}, 'alpha', .05, 'type', 'bca')';
+                
                 stats.ci(:,:,1) = cis(:,1)';
                 stats.ci(:,:,2) = cis(:,2)';
                 %[dummy, dummy, stats.z, stats.p] = bootbca_pval_onetail(0, mediationfun, bootpaths, mediationfun(x, y, m, intcpt, mediation_covariates), x, y, m, intcpt, mediation_covariates);
