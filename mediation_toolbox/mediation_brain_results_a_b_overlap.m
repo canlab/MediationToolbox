@@ -98,7 +98,7 @@ cl_apos_bpos = r;
 
 bothneg = bothsig & all(effect_obj.dat < 0, 2);
 obj = effect_obj;
-obj.dat = single(bothpos);
+obj.dat = single(bothneg);
 r = region(obj, 'noverbose');
 wh_omit = cat(1, r.numVox) < k;
 r(wh_omit) = [];
