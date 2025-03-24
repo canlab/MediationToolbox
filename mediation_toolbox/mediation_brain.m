@@ -7,6 +7,11 @@
 % For each contrast, it saves con, t, p, filtered t imgs, and clusters.mat
 % NB: p-value images are 2-tailed
 %
+% With bootstrapping, p values are derived directly from the null
+% distribution, and T statistics are not computed. If necessary or desired
+% (e.g., for a table of sig clusters including Max T value), T stats could be
+% approximated as follows: med_results.t = med_results.paths ./ med_results.ste
+%
 % Argument list:
 % ==============================================================
 % data options
