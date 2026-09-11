@@ -24,7 +24,7 @@ end
 
 if ~isempty(cl)
     cluster_orthviews(cl,'bivalent');
-    montage_clusters([],cl,[2 2]);
+    canlab_montage_clusters(cl, 'colormap');   % blobs colored by z-score (replaces montage_clusters)
 end
 
 return

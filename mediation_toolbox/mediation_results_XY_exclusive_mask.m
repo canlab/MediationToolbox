@@ -83,7 +83,7 @@ cl = cl(wh);
 cl_mediators = cl;
 
 cluster_orthviews(cl_mediators, {[1 1 0]},'overlay', ovl, 'add', 'solid');
-montage_clusters(ovl, cl_mediators, {'y'});
+canlab_montage_clusters(cl_mediators, 'colors', {'y'}, 'overlay', ovl);
 
 %
 cl_mediators = mediation_extract_data(cl_mediators);

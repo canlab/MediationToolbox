@@ -282,14 +282,10 @@ switch spm('Ver')
         % spm_defaults is a script
         disp('WARNING: spm defaults not set for spm2. Make sure your defaults are set correctly');
         
-    case {'SPM5' 'SPM8' 'SPM12'}
-        % spm_defaults is a function
-        spm_defaults()
-        
     otherwise
-        % unknown SPM
-        disp('Unknown version of SPM!');
-        spm_defaults()
+        % SPM5 and later (SPM8, SPM12, SPM25, ...): load defaults the
+        % supported way (direct spm_defaults calls are deprecated)
+        spm('Defaults', 'fmri')
 end
 
 

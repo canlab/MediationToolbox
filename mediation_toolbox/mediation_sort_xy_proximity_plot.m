@@ -54,17 +54,17 @@ function out = mediation_sort_xy_proximity_plot(clpos_data, xdata, ydata)
 
     
     whx = find(sigxy(:, 1) & ~sigxy(:, 2) & bxy(:, 1) > 0);
-montage_clusters([], clpos_data{1}(whx), {[0 0 1]});
+canlab_montage_clusters(clpos_data{1}(whx), 'colors', {[0 0 1]});
 saveas(gcf,'Xonly_pos', 'png');
 whx = find(sigxy(:, 1) & ~sigxy(:, 2) & bxy(:, 1) < 0);
-montage_clusters([], clpos_data{1}(whx), {[0 0 1]});
+canlab_montage_clusters(clpos_data{1}(whx), 'colors', {[0 0 1]});
 saveas(gcf,'Xonly_neg', 'png');
 why = find(sigxy(:, 2) & ~sigxy(:, 1) & bxy(:, 2) > 0);
-montage_clusters([], clpos_data{1}(why), {[1 0 0]});
+canlab_montage_clusters(clpos_data{1}(why), 'colors', {[1 0 0]});
 saveas(gcf,'Yonly_pos', 'png');
 why = find(sigxy(:, 2) & ~sigxy(:, 1) & bxy(:, 2) < 0);
 why
-montage_clusters([], clpos_data{1}(why), {[1 0 0]});
+canlab_montage_clusters(clpos_data{1}(why), 'colors', {[1 0 0]});
 saveas(gcf,'Yonly_neg', 'png');
 
     
@@ -75,13 +75,13 @@ saveas(gcf,'Yonly_neg', 'png');
     
     whn = find(~sigxy(:, 1) & ~sigxy(:, 2)); % neither
     
-    montage_clusters([], clpos_data{1}(whx), {[0 0 1] [1 0 0] [1 1 0]}, clpos_data{1}(why), clpos_data{1}(whb));
+    canlab_montage_clusters({clpos_data{1}(whx), clpos_data{1}(why), clpos_data{1}(whb)}, 'colors', {[0 0 1] [1 0 0] [1 1 0]});
     
     scn_export_papersetup(800)
     saveas(gcf, 'Sort_XY_stim_resp_only', 'png');
 
 
-    montage_clusters([], clpos_data{1}(whn), {[1 0 1]});
+    canlab_montage_clusters(clpos_data{1}(whn), 'colors', {[1 0 1]});
     scn_export_papersetup(800)
     saveas(gcf, 'Sort_XY_cannottell', 'png');
     

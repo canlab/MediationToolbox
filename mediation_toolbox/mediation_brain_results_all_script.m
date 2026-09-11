@@ -88,10 +88,11 @@ if ~exist(mask, 'file')
 end
 
 try
-    mask_fig_handle = montage_clusters(mask);
+    o2_mask = canlab_results_fmridisplay(fmri_data(mask, 'noverbose'), 'compact2', 'noverbose');
+    mask_fig_handle = ancestor(o2_mask.montage{1}.axis_handles(1), 'figure');
     set(mask_fig_handle, 'Name', 'Mask image');
 catch
-    disp('ERROR MAKING MONTAGE OF MASK. SKIPPING. WRONG VERSION OF MONTAGE_CLUSTERS.M?');
+    disp('ERROR MAKING MONTAGE OF MASK. SKIPPING.');
 end
 
 drawnow; snapnow;
